@@ -33,9 +33,12 @@ public class ReservationPanel extends JPanel {
         JPanel centerPanel = new JPanel(new BorderLayout(0, 20));
         
         // Form Panel
-        JPanel formWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createTitledBorder("Reserve Book"));
+        JPanel formWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 20, 15));
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Reserve Book"),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
         
         formPanel.add(new JLabel("Student KTU ID:"));
         studentIdField = new JTextField(15);

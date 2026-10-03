@@ -28,32 +28,42 @@ public class BorrowPanel extends JPanel {
         JPanel centerPanel = new JPanel(new GridLayout(1, 2, 20, 20));
         
         // Issue Panel
-        JPanel issuePanel = new JPanel(new GridLayout(4, 2, 10, 10));
-        issuePanel.setBorder(BorderFactory.createTitledBorder("Issue Book"));
+        JPanel issueWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel issuePanel = new JPanel(new GridLayout(4, 2, 20, 15));
+        issuePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Issue Book"),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
         issuePanel.add(new JLabel("Student KTU ID:"));
-        issueStudentIdField = new JTextField();
+        issueStudentIdField = new JTextField(15);
         issuePanel.add(issueStudentIdField);
         issuePanel.add(new JLabel("Book Accession ID:"));
-        issueBookIdField = new JTextField();
+        issueBookIdField = new JTextField(15);
         issuePanel.add(issueBookIdField);
         issuePanel.add(new JLabel("")); // spacer
         JButton issueBtn = new JButton("Issue Book");
         issueBtn.addActionListener(e -> attemptIssue());
         issuePanel.add(issueBtn);
+        issueWrapper.add(issuePanel);
         
         // Return Panel
-        JPanel returnPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        returnPanel.setBorder(BorderFactory.createTitledBorder("Return Book"));
+        JPanel returnWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel returnPanel = new JPanel(new GridLayout(3, 2, 20, 15));
+        returnPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Return Book"),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
         returnPanel.add(new JLabel("Book Accession ID:"));
-        returnBookIdField = new JTextField();
+        returnBookIdField = new JTextField(15);
         returnPanel.add(returnBookIdField);
         returnPanel.add(new JLabel("")); // spacer
         JButton returnBtn = new JButton("Return Book");
         returnBtn.addActionListener(e -> attemptReturn());
         returnPanel.add(returnBtn);
+        returnWrapper.add(returnPanel);
         
-        centerPanel.add(issuePanel);
-        centerPanel.add(returnPanel);
+        centerPanel.add(issueWrapper);
+        centerPanel.add(returnWrapper);
         
         add(centerPanel, BorderLayout.CENTER);
     }

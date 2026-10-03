@@ -32,7 +32,7 @@ public class DashboardPanel extends JPanel {
         add(navPanel, BorderLayout.NORTH);
         
         // Center Menu & Stats
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1));
+        JPanel centerPanel = new JPanel(new BorderLayout());
         
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
@@ -52,8 +52,13 @@ public class DashboardPanel extends JPanel {
         buttonPanel.add(reserveBtn);
         
         // Stats
-        JPanel statsPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        statsPanel.setBorder(BorderFactory.createTitledBorder("Library Analytics"));
+        JPanel statsWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel statsPanel = new JPanel(new GridLayout(3, 2, 20, 15));
+        statsPanel.setPreferredSize(new Dimension(400, 130));
+        statsPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Library Analytics"),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
         
         totalBooksLbl = new JLabel("Total Books: ");
         availableBooksLbl = new JLabel("Available Books: ");
@@ -67,8 +72,10 @@ public class DashboardPanel extends JPanel {
         statsPanel.add(totalStudentsLbl);
         statsPanel.add(activeTxLbl);
         
-        centerPanel.add(buttonPanel);
-        centerPanel.add(statsPanel);
+        statsWrapper.add(statsPanel);
+        
+        centerPanel.add(buttonPanel, BorderLayout.NORTH);
+        centerPanel.add(statsWrapper, BorderLayout.CENTER);
         
         add(centerPanel, BorderLayout.CENTER);
     }
