@@ -62,4 +62,46 @@ public class BookService {
             throw new LibraryException("Invalid book status.");
         }
     }
+
+    public List<Object[]> searchAvailableBooks(String query) throws LibraryException {
+        List<Book> allBooks = bookDAO.findAll();
+        List<com.college.library.model.Category> categories = bookDAO.getAllCategories();
+        
+        java.util.Map<Integer, String> catMap = new java.util.HashMap<>();
+        for (com.college.library.model.Category c : categories) {
+            catMap.put(c.getId(), c.getName());
+        }
+        
+        java.util.Map<String, Object[]> grouped = new java.util.LinkedHashMap<>();
+        String lowerQuery = query == null ? "" : query.toLowerCase().trim();
+        
+        for (Book b : allBooks) {
+            boolean matches = lowerQuery.isEmpty() || 
+                              b.getTitle().toLowerCase().contains(lowerQuery) ||
+                              b.getAuthor().toLowerCase().contains(lowerQuery) ||
+                              b.getIsbn().toLowerCase().contains(lowerQuery);
+            if (!matches) continue;
+            
+            Object[] row = grouped.get(b.getIsbn());
+            if (row == null) {
+                String catName = catMap.getOrDefault(b.getCategoryId(), "Unknown");
+                row = new Object[] { b.getIsbn(), b.getTitle(), b.getAuthor(), catName, 0 };
+                grouped.put(b.getIsbn(), row);
+            }
+            if ("AVAILABLE".equals(b.getStatus())) {
+                row[4] = (Integer) row[4] + 1;
+            }
+        }
+        return new java.util.ArrayList<>(grouped.values());
+    }
+    
+    public String getFirstAvailableBookId(String isbn) throws LibraryException {
+        List<Book> books = bookDAO.findByIsbn(isbn);
+        for (Book b : books) {
+            if ("AVAILABLE".equals(b.getStatus())) {
+                return b.getAccessionId();
+            }
+        }
+        return null;
+    }
 }

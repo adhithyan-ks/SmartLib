@@ -102,7 +102,18 @@ class BorrowServiceTest {
             @Override public void delete(Integer id) {}
         };
 
-        borrowService = new BorrowService(mockTxDAO, mockBookDAO, mockStudentDAO, mockResDAO);
+        com.college.library.dao.BorrowRequestDAO mockBorrowReqDAO = new com.college.library.dao.BorrowRequestDAO() {
+            @Override public void create(com.college.library.model.BorrowRequest r) {}
+            @Override public Optional<com.college.library.model.BorrowRequest> findById(Integer id) { return Optional.empty(); }
+            @Override public java.util.List<com.college.library.model.BorrowRequest> findAll() { return null; }
+            @Override public void update(com.college.library.model.BorrowRequest r) {}
+            @Override public void delete(Integer id) {}
+            @Override public java.util.List<com.college.library.model.BorrowRequest> findByStudentId(String id) { return null; }
+            @Override public java.util.List<com.college.library.model.BorrowRequest> findByStatus(String status) { return null; }
+            @Override public Optional<com.college.library.model.BorrowRequest> findPendingByStudentAndBook(String s, String b) { return Optional.empty(); }
+        };
+
+        borrowService = new BorrowService(mockTxDAO, mockBookDAO, mockStudentDAO, mockResDAO, mockBorrowReqDAO);
     }
 
     @Test

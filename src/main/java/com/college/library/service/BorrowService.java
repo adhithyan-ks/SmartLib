@@ -22,15 +22,17 @@ public class BorrowService {
     private final BookDAO bookDAO;
     private final StudentDAO studentDAO;
     private final ReservationDAO reservationDAO;
+    private final com.college.library.dao.BorrowRequestDAO borrowRequestDAO;
     
     private static final double FINE_PER_DAY = 10.0;
     private static final int MAX_BORROW_DAYS = 14;
 
-    public BorrowService(BorrowTransactionDAO transactionDAO, BookDAO bookDAO, StudentDAO studentDAO, ReservationDAO reservationDAO) {
+    public BorrowService(BorrowTransactionDAO transactionDAO, BookDAO bookDAO, StudentDAO studentDAO, ReservationDAO reservationDAO, com.college.library.dao.BorrowRequestDAO borrowRequestDAO) {
         this.transactionDAO = transactionDAO;
         this.bookDAO = bookDAO;
         this.studentDAO = studentDAO;
         this.reservationDAO = reservationDAO;
+        this.borrowRequestDAO = borrowRequestDAO;
     }
 
     public void issueBook(String studentId, String bookId, int librarianId) throws LibraryException {
@@ -177,5 +179,68 @@ public class BorrowService {
         } catch (SQLException e) {
             throw new LibraryException("Database error during reservation fulfilment: " + e.getMessage(), e);
         }
+    }
+
+    public java.util.List<BorrowTransaction> getStudentHistory(String studentId) throws LibraryException {
+        return transactionDAO.findByStudentId(studentId);
+    }
+    
+    // Borrow Request Methods
+    public void requestToBorrow(String studentId, String bookId) throws LibraryException {
+        Optional<Book> bookOpt = bookDAO.findById(bookId);
+        if (bookOpt.isEmpty()) {
+            throw new LibraryException("Book not found.");
+        }
+        Book book = bookOpt.get();
+        if (!"AVAILABLE".equals(book.getStatus())) {
+            throw new LibraryException("This book is not available. Please use the reservation feature instead.");
+        }
+        
+        Optional<com.college.library.model.BorrowRequest> pending = borrowRequestDAO.findPendingByStudentAndBook(studentId, bookId);
+        if (pending.isPresent()) {
+            throw new LibraryException("You already have a pending request for this book.");
+        }
+        
+        com.college.library.model.BorrowRequest req = new com.college.library.model.BorrowRequest();
+        req.setStudentId(studentId);
+        req.setBookId(bookId);
+        req.setRequestDate(java.time.LocalDateTime.now());
+        req.setStatus("PENDING");
+        borrowRequestDAO.create(req);
+    }
+    
+    public java.util.List<com.college.library.model.BorrowRequest> getStudentBorrowRequests(String studentId) throws LibraryException {
+        return borrowRequestDAO.findByStudentId(studentId);
+    }
+    
+    public java.util.List<com.college.library.model.BorrowRequest> getAllPendingBorrowRequests() throws LibraryException {
+        return borrowRequestDAO.findByStatus("PENDING");
+    }
+    
+    public String approveBorrowRequest(int requestId, int librarianId) throws LibraryException {
+        com.college.library.model.BorrowRequest req = borrowRequestDAO.findById(requestId)
+            .orElseThrow(() -> new LibraryException("Request not found."));
+            
+        if (!"PENDING".equals(req.getStatus())) {
+            throw new LibraryException("Request is not pending.");
+        }
+        
+        issueBook(req.getStudentId(), req.getBookId(), librarianId);
+        
+        req.setStatus("APPROVED"); // Or "ISSUED" depending on preference, we will use "ISSUED"
+        borrowRequestDAO.update(req);
+        return "Request approved and book issued.";
+    }
+    
+    public void rejectBorrowRequest(int requestId) throws LibraryException {
+        com.college.library.model.BorrowRequest req = borrowRequestDAO.findById(requestId)
+            .orElseThrow(() -> new LibraryException("Request not found."));
+            
+        if (!"PENDING".equals(req.getStatus())) {
+            throw new LibraryException("Request is not pending.");
+        }
+        
+        req.setStatus("REJECTED");
+        borrowRequestDAO.update(req);
     }
 }

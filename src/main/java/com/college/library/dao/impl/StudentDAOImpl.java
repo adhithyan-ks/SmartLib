@@ -14,17 +14,18 @@ public class StudentDAOImpl implements StudentDAO {
 
     @Override
     public void create(Student student) throws LibraryException {
-        String sql = "INSERT INTO students (ktu_id, name, branch, semester, batch, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO students (ktu_id, password_hash, name, branch, semester, batch, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, student.getKtuId());
-            pstmt.setString(2, student.getName());
-            pstmt.setString(3, student.getBranch());
-            pstmt.setInt(4, student.getSemester());
-            pstmt.setString(5, student.getBatch());
-            pstmt.setString(6, student.getEmail());
-            pstmt.setString(7, student.getPhone());
+            pstmt.setString(2, student.getPasswordHash());
+            pstmt.setString(3, student.getName());
+            pstmt.setString(4, student.getBranch());
+            pstmt.setInt(5, student.getSemester());
+            pstmt.setString(6, student.getBatch());
+            pstmt.setString(7, student.getEmail());
+            pstmt.setString(8, student.getPhone());
             
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -69,17 +70,18 @@ public class StudentDAOImpl implements StudentDAO {
 
     @Override
     public void update(Student student) throws LibraryException {
-        String sql = "UPDATE students SET name=?, branch=?, semester=?, batch=?, email=?, phone=? WHERE ktu_id=?";
+        String sql = "UPDATE students SET password_hash=?, name=?, branch=?, semester=?, batch=?, email=?, phone=? WHERE ktu_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, student.getName());
-            pstmt.setString(2, student.getBranch());
-            pstmt.setInt(3, student.getSemester());
-            pstmt.setString(4, student.getBatch());
-            pstmt.setString(5, student.getEmail());
-            pstmt.setString(6, student.getPhone());
-            pstmt.setString(7, student.getKtuId());
+            pstmt.setString(1, student.getPasswordHash());
+            pstmt.setString(2, student.getName());
+            pstmt.setString(3, student.getBranch());
+            pstmt.setInt(4, student.getSemester());
+            pstmt.setString(5, student.getBatch());
+            pstmt.setString(6, student.getEmail());
+            pstmt.setString(7, student.getPhone());
+            pstmt.setString(8, student.getKtuId());
             
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -101,8 +103,17 @@ public class StudentDAOImpl implements StudentDAO {
     }
     
     private Student mapResultSetToStudent(ResultSet rs) throws SQLException {
+        // Handle password_hash column safely in case it doesn't exist yet or is null
+        String passwordHash = null;
+        try {
+            passwordHash = rs.getString("password_hash");
+        } catch (SQLException ignored) {
+            // Column might not exist if migration hasn't run yet
+        }
+        
         return new Student(
             rs.getString("ktu_id"),
+            passwordHash,
             rs.getString("name"),
             rs.getString("branch"),
             rs.getInt("semester"),

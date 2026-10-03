@@ -79,6 +79,10 @@ public class ReservationPanel extends JPanel {
         centerPanel.add(tablePanel, BorderLayout.CENTER);
         
         add(centerPanel, BorderLayout.CENTER);
+        
+        // Setup custom table selection behavior
+        TableSelectionHelper.setupMutuallyExclusiveTables(reservationsTable);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{reservationsTable}, fulfilBtn);
     }
     
     public void refreshData() {
@@ -120,6 +124,7 @@ public class ReservationPanel extends JPanel {
             String msg = borrowService.fulfilReservation(reservationId, librarianId);
             JOptionPane.showMessageDialog(this, msg, "Fulfilment Success", JOptionPane.INFORMATION_MESSAGE);
             refreshData();
+            reservationsTable.clearSelection();
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }

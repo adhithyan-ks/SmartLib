@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS librarians (
 
 CREATE TABLE IF NOT EXISTS students (
     ktu_id VARCHAR(20) PRIMARY KEY,
+    password_hash VARCHAR(255),
     name VARCHAR(100),
     branch VARCHAR(50),
     semester INT,
@@ -56,4 +57,14 @@ CREATE TABLE IF NOT EXISTS reservations (
     request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('PENDING', 'FULFILLED', 'CANCELLED'),
     FOREIGN KEY (student_id) REFERENCES students(ktu_id)
+);
+
+CREATE TABLE IF NOT EXISTS borrow_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(20) NOT NULL,
+    book_id VARCHAR(50) NOT NULL,
+    request_date DATETIME NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(ktu_id),
+    FOREIGN KEY (book_id) REFERENCES books(accession_id)
 );

@@ -49,6 +49,10 @@ public class BookPanel extends JPanel {
         bottomPanel.add(addBtn);
         bottomPanel.add(deleteBtn);
         add(bottomPanel, BorderLayout.SOUTH);
+        
+        // Setup custom table selection behavior
+        TableSelectionHelper.setupMutuallyExclusiveTables(bookTable);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{bookTable}, deleteBtn);
     }
 
     public void refreshData() {
@@ -133,6 +137,7 @@ public class BookPanel extends JPanel {
             try {
                 bookService.deleteBook(id);
                 refreshData();
+                bookTable.clearSelection();
             } catch (LibraryException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

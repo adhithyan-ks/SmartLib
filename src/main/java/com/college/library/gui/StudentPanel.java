@@ -46,6 +46,10 @@ public class StudentPanel extends JPanel {
         bottomPanel.add(addBtn);
         bottomPanel.add(deleteBtn);
         add(bottomPanel, BorderLayout.SOUTH);
+        
+        // Setup custom table selection behavior
+        TableSelectionHelper.setupMutuallyExclusiveTables(studentTable);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{studentTable}, deleteBtn);
     }
 
     public void refreshData() {
@@ -113,6 +117,7 @@ public class StudentPanel extends JPanel {
             try {
                 studentService.deleteStudent(id);
                 refreshData();
+                studentTable.clearSelection();
             } catch (LibraryException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

@@ -107,4 +107,15 @@ public class ReservationService {
         
         return result;
     }
+    
+    public java.util.List<Object[]> getStudentReservationsWithDetails(String studentId) throws LibraryException {
+        java.util.List<Object[]> result = new java.util.ArrayList<>();
+        java.util.List<Object[]> all = getAllReservationsWithDetails();
+        for (Object[] row : all) {
+            if (studentId.equals(row[1])) {
+                result.add(row);
+            }
+        }
+        return result;
+    }
 }

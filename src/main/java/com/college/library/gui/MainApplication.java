@@ -20,6 +20,7 @@ public class MainApplication extends JFrame {
     private AnalyticsService analyticsService;
     
     private Librarian loggedInUser;
+    private com.college.library.model.Student loggedInStudent;
     
     // Panels
     private LoginPanel loginPanel;
@@ -28,6 +29,7 @@ public class MainApplication extends JFrame {
     private StudentPanel studentPanel;
     private BorrowPanel borrowPanel;
     private ReservationPanel reservationPanel;
+    private StudentDashboardPanel studentDashboardPanel;
 
     public MainApplication() {
         initServices();
@@ -38,9 +40,11 @@ public class MainApplication extends JFrame {
         authService = new AuthService(new LibrarianDAOImpl());
         bookService = new BookService(new BookDAOImpl());
         studentService = new StudentService(new StudentDAOImpl());
-        borrowService = new BorrowService(new BorrowTransactionDAOImpl(), new BookDAOImpl(), new StudentDAOImpl(), new ReservationDAOImpl());
+        borrowService = new BorrowService(new BorrowTransactionDAOImpl(), new BookDAOImpl(), new StudentDAOImpl(), new ReservationDAOImpl(), new BorrowRequestDAOImpl());
         reservationService = new ReservationService(new ReservationDAOImpl(), new StudentDAOImpl(), new BookDAOImpl());
         analyticsService = new AnalyticsService(new BookDAOImpl(), new StudentDAOImpl(), new BorrowTransactionDAOImpl());
+        
+        authService.setStudentDAO(new StudentDAOImpl());
     }
 
     private void initUI() {
@@ -58,6 +62,7 @@ public class MainApplication extends JFrame {
         studentPanel = new StudentPanel(this, studentService);
         borrowPanel = new BorrowPanel(this, borrowService);
         reservationPanel = new ReservationPanel(this, reservationService, borrowService);
+        studentDashboardPanel = new StudentDashboardPanel(this, borrowService, reservationService, bookService);
         
         mainPanel.add(loginPanel, "LOGIN");
         mainPanel.add(dashboardPanel, "DASHBOARD");
@@ -65,6 +70,7 @@ public class MainApplication extends JFrame {
         mainPanel.add(studentPanel, "STUDENTS");
         mainPanel.add(borrowPanel, "BORROW");
         mainPanel.add(reservationPanel, "RESERVE");
+        mainPanel.add(studentDashboardPanel, "STUDENT_DASHBOARD");
         
         add(mainPanel);
         cardLayout.show(mainPanel, "LOGIN");
@@ -72,11 +78,13 @@ public class MainApplication extends JFrame {
     
     public void navigateTo(String viewName) {
         cardLayout.show(mainPanel, viewName);
-        if ("DASHBOARD".equals(viewName)) dashboardPanel.refreshData();
+        if ("LOGIN".equals(viewName)) loginPanel.resetFields();
+        else if ("DASHBOARD".equals(viewName)) dashboardPanel.refreshData();
         else if ("BOOKS".equals(viewName)) bookPanel.refreshData();
         else if ("STUDENTS".equals(viewName)) studentPanel.refreshData();
         else if ("BORROW".equals(viewName)) borrowPanel.refreshData();
         else if ("RESERVE".equals(viewName)) reservationPanel.refreshData();
+        else if ("STUDENT_DASHBOARD".equals(viewName)) studentDashboardPanel.refreshData();
     }
     
     public void setLoggedInUser(Librarian user) {
@@ -85,6 +93,14 @@ public class MainApplication extends JFrame {
     
     public Librarian getLoggedInUser() {
         return loggedInUser;
+    }
+    
+    public void setLoggedInStudent(com.college.library.model.Student student) {
+        this.loggedInStudent = student;
+    }
+    
+    public com.college.library.model.Student getLoggedInStudent() {
+        return loggedInStudent;
     }
 
     public static void main(String[] args) {
