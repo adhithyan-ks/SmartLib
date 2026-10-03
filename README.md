@@ -1,2 +1,2 @@
-# SmartLib
-SmartLib is a Java Swing and MySQL-based College Library Management System built using Object-Oriented Programming principles, with smart book recommendations, reservation queues, and library analytics.
+# SmartLib — Smarter Library Management, Powered by Java OOP.
+A standalone desktop application designed to simplify college library operations through book and student management, issue/return tracking, reservation queues, personalized book recommendations, and data-driven library analytics.
