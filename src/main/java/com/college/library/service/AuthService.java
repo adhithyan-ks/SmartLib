@@ -75,6 +75,10 @@ public class AuthService {
     }
     
     public void registerStudent(String ktuId, String name, String password) throws LibraryException {
+        registerStudent(ktuId, name, "", "", "", "", "", password);
+    }
+
+    public void registerStudent(String ktuId, String name, String branch, String semester, String batch, String email, String phone, String password) throws LibraryException {
         if (studentDAO == null) throw new LibraryException("StudentDAO not initialized in AuthService");
         
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(12));
@@ -91,7 +95,14 @@ public class AuthService {
             }
             studentDAO.update(existing);
         } else {
-            com.college.library.model.Student newStudent = new com.college.library.model.Student(ktuId, hashedPassword, name, "", 1, "", "", "");
+            int sem = 1;
+            if (semester != null && !semester.trim().isEmpty()) {
+                try {
+                    sem = Integer.parseInt(semester.trim());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            com.college.library.model.Student newStudent = new com.college.library.model.Student(ktuId, hashedPassword, name, branch, sem, batch, email, phone);
             studentDAO.create(newStudent);
         }
     }

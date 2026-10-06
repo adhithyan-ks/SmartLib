@@ -139,6 +139,11 @@ public class LoginPanel extends JPanel {
     private void showStudentRegistrationForm() {
         JTextField nameField = new JTextField(15);
         JTextField ktuIdField = new JTextField(15);
+        JTextField branchField = new JTextField(15);
+        JTextField semesterField = new JTextField(15);
+        JTextField batchField = new JTextField(15);
+        JTextField emailField = new JTextField(15);
+        JTextField phoneField = new JTextField(15);
         
         // If they already typed a valid KTU ID, pre-fill it
         String currentKtuId = stuIdField.getText().trim();
@@ -154,16 +159,32 @@ public class LoginPanel extends JPanel {
         panel.add(nameField);
         panel.add(new JLabel("KTU ID:"));
         panel.add(ktuIdField);
+
+        panel.add(new JLabel("Branch:"));
+        panel.add(branchField);
+        panel.add(new JLabel("Semester:"));
+        panel.add(semesterField);
+        panel.add(new JLabel("Batch:"));
+        panel.add(batchField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Phone:"));
+        panel.add(phoneField);
+
         panel.add(new JLabel("Password:"));
         panel.add(passField);
         panel.add(new JLabel("Confirm Password:"));
         panel.add(confirmPassField);
-        
         int result = JOptionPane.showConfirmDialog(this, panel, "Student Registration", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         
         if (result == JOptionPane.OK_OPTION) {
             String name = nameField.getText().trim();
             String ktuId = ktuIdField.getText().trim();
+            String branch = branchField.getText().trim();
+            String semester = semesterField.getText().trim();
+            String batch = batchField.getText().trim();
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
             String password = new String(passField.getPassword());
             String confirmPass = new String(confirmPassField.getPassword());
             
@@ -175,13 +196,17 @@ public class LoginPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Invalid KTU ID format.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (branch.isEmpty() || semester.isEmpty() || batch.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all the details.", "Registration Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if (!password.equals(confirmPass)) {
                 JOptionPane.showMessageDialog(this, "Passwords do not match.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
             try {
-                authService.registerStudent(ktuId, name, password);
+                authService.registerStudent(ktuId, name, branch, semester, batch, email, phone, password);
                 JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 stuIdField.setText(ktuId);
                 stuPassField.setText("");
@@ -191,7 +216,7 @@ public class LoginPanel extends JPanel {
         }
     }
     
-    public void resetFields() {
+public void resetFields() {
         libUserField.setText("");
         libPassField.setText("");
         stuIdField.setText("");
