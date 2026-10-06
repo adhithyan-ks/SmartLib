@@ -26,7 +26,7 @@ public class StudentPanel extends JPanel {
         topPanel.add(backBtn);
         add(topPanel, BorderLayout.NORTH);
 
-        String[] columns = {"KTU ID", "Name", "Branch", "Semester"};
+        String[] columns = {"KTU ID", "Name", "Branch", "Semester", "Batch", "Email", "Phone"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -61,7 +61,10 @@ public class StudentPanel extends JPanel {
                     s.getKtuId(),
                     s.getName(),
                     s.getBranch(),
-                    s.getSemester()
+                    s.getSemester(),
+                    s.getBatch(),
+                    s.getEmail(),
+                    s.getPhone()
                 });
             }
         } catch (LibraryException ex) {
@@ -72,27 +75,89 @@ public class StudentPanel extends JPanel {
     private void showAddDialog() {
         JTextField idField = new JTextField();
         JTextField nameField = new JTextField();
-        JTextField branchField = new JTextField();
-        JTextField semField = new JTextField();
+        
+        String[] branches = {"CSE", "ECE", "AEI", "EEE", "EL", "CE", "ME", "IE"};
+        JComboBox<String> branchBox = new JComboBox<>(branches);
+        
+        String[] semesters = {"1", "2", "3", "4", "5", "6", "7", "8"};
+        JComboBox<String> semBox = new JComboBox<>(semesters);
+        
+        String[] batches = {"2020-2024", "2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-2029", "2026-2030"};
+        JComboBox<String> batchBox = new JComboBox<>(batches);
+        batchBox.setSelectedItem("2023-2027");
+        
+        JTextField emailField = new JTextField();
+        JTextField phoneField = new JTextField();
+
+        // Auto-select batch and branch when valid KTU ID is typed
+        Runnable updateAutoSelect = () -> {
+            String currentKtuId = idField.getText().trim();
+            if (currentKtuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+                String yearCode = currentKtuId.substring(3, 5);
+                int startYear = 2000 + Integer.parseInt(yearCode);
+                String batch = startYear + "-" + (startYear + 4);
+                batchBox.setSelectedItem(batch);
+
+                String branchCode = currentKtuId.substring(5, 7);
+                switch (branchCode) {
+                    case "CS": branchBox.setSelectedItem("CSE"); break;
+                    case "EC": branchBox.setSelectedItem("ECE"); break;
+                    case "AE": branchBox.setSelectedItem("AEI"); break;
+                    case "EE": branchBox.setSelectedItem("EEE"); break;
+                    case "EL": branchBox.setSelectedItem("EL"); break;
+                    case "CE": branchBox.setSelectedItem("CE"); break;
+                    case "ME": branchBox.setSelectedItem("ME"); break;
+                    case "IE": branchBox.setSelectedItem("IE"); break;
+                }
+            }
+        };
+
+        idField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateAutoSelect.run(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateAutoSelect.run(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateAutoSelect.run(); }
+        });
         
         Object[] message = {
             "KTU ID:", idField,
             "Name:", nameField,
-            "Branch:", branchField,
-            "Semester:", semField
+            "Branch:", branchBox,
+            "Semester:", semBox,
+            "Batch:", batchBox,
+            "Email:", emailField,
+            "Phone:", phoneField
         };
         
         int option = JOptionPane.showConfirmDialog(this, message, "Add New Student", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            Student s = new Student();
-            s.setKtuId(idField.getText().trim());
-            s.setName(nameField.getText().trim());
-            s.setBranch(branchField.getText().trim());
-            try {
-                s.setSemester(Integer.parseInt(semField.getText().trim()));
-            } catch (NumberFormatException e) {
-                s.setSemester(1);
+            String ktuId = idField.getText().trim();
+            String name = nameField.getText().trim();
+            String branch = branchBox.getSelectedItem() != null ? branchBox.getSelectedItem().toString().trim() : "";
+            String semesterStr = semBox.getSelectedItem() != null ? semBox.getSelectedItem().toString().trim() : "1";
+            String batch = batchBox.getSelectedItem() != null ? batchBox.getSelectedItem().toString().trim() : "";
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            
+            if (name.isEmpty() || ktuId.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "KTU ID and Name are required.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+            if (!ktuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+                JOptionPane.showMessageDialog(this, "Invalid KTU ID format.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (branch.isEmpty() || semesterStr.isEmpty() || batch.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all the details.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int semester = 1;
+            try {
+                semester = Integer.parseInt(semesterStr);
+            } catch (NumberFormatException ignored) {
+            }
+
+            Student s = new Student(ktuId, name, branch, semester, batch, email, phone);
             
             try {
                 studentService.addStudent(s);
