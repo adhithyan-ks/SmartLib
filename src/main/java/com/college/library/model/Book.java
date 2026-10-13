@@ -5,22 +5,23 @@ public class Book {
     private String isbn;
     private String title;
     private String author;
-    private String publisher;
-    private String edition;
     private int categoryId;
     private String status; // 'AVAILABLE', 'ISSUED', 'LOST', 'DAMAGED'
 
     public Book() {}
 
-    public Book(String accessionId, String isbn, String title, String author, String publisher, String edition, int categoryId, String status) {
+    public Book(String accessionId, String isbn, String title, String author, int categoryId, String status) {
         this.accessionId = accessionId;
         this.isbn = isbn;
         this.title = title;
         this.author = author;
-        this.publisher = publisher;
-        this.edition = edition;
         this.categoryId = categoryId;
         this.status = status;
+    }
+
+    @Deprecated
+    public Book(String accessionId, String isbn, String title, String author, String publisher, String edition, int categoryId, String status) {
+        this(accessionId, isbn, title, author, categoryId, status);
     }
 
     public String getAccessionId() { return accessionId; }
@@ -34,12 +35,6 @@ public class Book {
 
     public String getAuthor() { return author; }
     public void setAuthor(String author) { this.author = author; }
-
-    public String getPublisher() { return publisher; }
-    public void setPublisher(String publisher) { this.publisher = publisher; }
-
-    public String getEdition() { return edition; }
-    public void setEdition(String edition) { this.edition = edition; }
 
     public int getCategoryId() { return categoryId; }
     public void setCategoryId(int categoryId) { this.categoryId = categoryId; }

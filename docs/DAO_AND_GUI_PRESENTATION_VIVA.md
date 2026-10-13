@@ -98,7 +98,7 @@ public interface CrudDAO<T, ID> {
   - `updateStatusIfCondition(String accessionId, String newStatus, String expectedOldStatus, Connection conn)`: **Atomic conditional update** preventing race conditions during concurrent checkouts.
   - `getAllCategories()`: Retrieves catalog categories (`Category` objects).
   - `findByIsbn(String isbn)`: Retrieves all physical copies of a given title edition.
-- **ResultSet Mapper**: Private method `mapResultSetToBook(ResultSet rs)` extracts columns (`accession_id`, `isbn`, `title`, `author`, `publisher`, `edition`, `category_id`, `status`) into an immutable or stateful `Book` object.
+- **ResultSet Mapper**: Private method `mapResultSetToBook(ResultSet rs)` extracts columns (`accession_id`, `isbn`, `title`, `author`, `category_id`, `status`) into a `Book` object.
 
 #### 2. `StudentDAO` & `StudentDAOImpl`
 - **Interface**: Extends `CrudDAO<Student, String>` (where `ktu_id` is the primary key).

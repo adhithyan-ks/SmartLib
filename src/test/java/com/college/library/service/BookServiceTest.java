@@ -38,20 +38,20 @@ class BookServiceTest {
 
     @Test
     void testAddBookSuccess() throws Exception {
-        Book b = new Book("NEW", "123", "Title", "Author", "Pub", "1", 1, "AVAILABLE");
+        Book b = new Book("NEW", "123", "Title", "Author", 1, "AVAILABLE");
         bookService.addBook(b);
         assertTrue(createCalled);
     }
 
     @Test
     void testAddBookDuplicate() {
-        Book b = new Book("EXISTS", "123", "Title", "Author", "Pub", "1", 1, "AVAILABLE");
+        Book b = new Book("EXISTS", "123", "Title", "Author", 1, "AVAILABLE");
         assertThrows(LibraryException.class, () -> bookService.addBook(b));
     }
     
     @Test
     void testValidateBookMissingTitle() {
-        Book b = new Book("NEW2", "123", "", "Author", "Pub", "1", 1, "AVAILABLE");
+        Book b = new Book("NEW2", "123", "", "Author", 1, "AVAILABLE");
         assertThrows(LibraryException.class, () -> bookService.addBook(b));
     }
 }

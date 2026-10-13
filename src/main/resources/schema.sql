@@ -28,8 +28,6 @@ CREATE TABLE IF NOT EXISTS books (
     isbn VARCHAR(20),
     title VARCHAR(255),
     author VARCHAR(255),
-    publisher VARCHAR(100),
-    edition VARCHAR(50),
     category_id INT,
     status ENUM('AVAILABLE', 'ISSUED', 'LOST', 'DAMAGED'),
     FOREIGN KEY (category_id) REFERENCES categories(id)

@@ -15,7 +15,7 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public void create(Book book) throws LibraryException {
-        String sql = "INSERT INTO books (accession_id, isbn, title, author, publisher, edition, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO books (accession_id, isbn, title, author, category_id, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
@@ -23,10 +23,8 @@ public class BookDAOImpl implements BookDAO {
             pstmt.setString(2, book.getIsbn());
             pstmt.setString(3, book.getTitle());
             pstmt.setString(4, book.getAuthor());
-            pstmt.setString(5, book.getPublisher());
-            pstmt.setString(6, book.getEdition());
-            pstmt.setInt(7, book.getCategoryId());
-            pstmt.setString(8, book.getStatus());
+            pstmt.setInt(5, book.getCategoryId());
+            pstmt.setString(6, book.getStatus());
             
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -71,18 +69,16 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public void update(Book book) throws LibraryException {
-        String sql = "UPDATE books SET isbn=?, title=?, author=?, publisher=?, edition=?, category_id=?, status=? WHERE accession_id=?";
+        String sql = "UPDATE books SET isbn=?, title=?, author=?, category_id=?, status=? WHERE accession_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, book.getIsbn());
             pstmt.setString(2, book.getTitle());
             pstmt.setString(3, book.getAuthor());
-            pstmt.setString(4, book.getPublisher());
-            pstmt.setString(5, book.getEdition());
-            pstmt.setInt(6, book.getCategoryId());
-            pstmt.setString(7, book.getStatus());
-            pstmt.setString(8, book.getAccessionId());
+            pstmt.setInt(4, book.getCategoryId());
+            pstmt.setString(5, book.getStatus());
+            pstmt.setString(6, book.getAccessionId());
             
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -169,8 +165,6 @@ public class BookDAOImpl implements BookDAO {
             rs.getString("isbn"),
             rs.getString("title"),
             rs.getString("author"),
-            rs.getString("publisher"),
-            rs.getString("edition"),
             rs.getInt("category_id"),
             rs.getString("status")
         );

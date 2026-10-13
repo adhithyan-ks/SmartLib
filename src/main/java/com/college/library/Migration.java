@@ -29,6 +29,18 @@ public class Migration {
                 // Column might already exist
             }
 
+            try {
+                stmt.executeUpdate("ALTER TABLE books DROP COLUMN publisher");
+            } catch (Exception ignored) {
+                // Column might already be dropped or not exist
+            }
+
+            try {
+                stmt.executeUpdate("ALTER TABLE books DROP COLUMN edition");
+            } catch (Exception ignored) {
+                // Column might already be dropped or not exist
+            }
+
             System.out.println("Migration successful!");
         } catch (Exception e) {
             e.printStackTrace();

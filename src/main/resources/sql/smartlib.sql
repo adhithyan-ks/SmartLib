@@ -99,71 +99,71 @@ INSERT INTO `students` (`ktu_id`, `password_hash`, `name`, `branch`, `semester`,
 
 -- BOOKS
 
-INSERT INTO `books` (`accession_id`, `isbn`, `title`, `author`, `publisher`, `edition`, `category_id`, `status`) VALUES
+INSERT INTO `books` (`accession_id`, `isbn`, `title`, `author`, `category_id`, `status`) VALUES
 
-('B001-1', '9780132350884', 'Clean Code', 'Robert C. Martin', 'Prentice Hall', '1st', 1, 'AVAILABLE'),
+('B001-1', '9780132350884', 'Clean Code', 'Robert C. Martin', 1, 'AVAILABLE'),
 
-('B001-2', '9780132350884', 'Clean Code', 'Robert C. Martin', 'Prentice Hall', '1st', 1, 'AVAILABLE'),
+('B001-2', '9780132350884', 'Clean Code', 'Robert C. Martin', 1, 'AVAILABLE'),
 
-('B002-1', '9780135957059', 'The Pragmatic Programmer', 'Andrew Hunt', 'Addison-Wesley', '2nd', 1, 'ISSUED'),
+('B002-1', '9780135957059', 'The Pragmatic Programmer', 'Andrew Hunt', 1, 'ISSUED'),
 
-('B002-2', '9780135957059', 'The Pragmatic Programmer', 'Andrew Hunt', 'Addison-Wesley', '2nd', 1, 'AVAILABLE'),
+('B002-2', '9780135957059', 'The Pragmatic Programmer', 'Andrew Hunt', 1, 'AVAILABLE'),
 
-('B003-1', '9780262046305', 'Introduction to Algorithms', 'Cormen et al.', 'MIT Press', '4th', 2, 'ISSUED'),
+('B003-1', '9780262046305', 'Introduction to Algorithms', 'Cormen et al.', 2, 'ISSUED'),
 
-('B003-2', '9780262046305', 'Introduction to Algorithms', 'Cormen et al.', 'MIT Press', '4th', 2, 'AVAILABLE'),
+('B003-2', '9780262046305', 'Introduction to Algorithms', 'Cormen et al.', 2, 'AVAILABLE'),
 
-('B004-1', '9780672324536', 'Data Structures and Algorithms in Java', 'Robert Lafore', 'Sams', '2nd', 2, 'AVAILABLE'),
+('B004-1', '9780672324536', 'Data Structures and Algorithms in Java', 'Robert Lafore', 2, 'AVAILABLE'),
 
-('B004-2', '9780672324536', 'Data Structures and Algorithms in Java', 'Robert Lafore', 'Sams', '2nd', 2, 'ISSUED'),
+('B004-2', '9780672324536', 'Data Structures and Algorithms in Java', 'Robert Lafore', 2, 'ISSUED'),
 
-('B005-1', '9780078022159', 'Database System Concepts', 'Silberschatz', 'McGraw-Hill', '7th', 3, 'ISSUED'),
+('B005-1', '9780078022159', 'Database System Concepts', 'Silberschatz', 3, 'ISSUED'),
 
-('B005-2', '9780078022159', 'Database System Concepts', 'Silberschatz', 'McGraw-Hill', '7th', 3, 'AVAILABLE'),
+('B005-2', '9780078022159', 'Database System Concepts', 'Silberschatz', 3, 'AVAILABLE'),
 
-('B006-1', '9780133970777', 'Fundamentals of Database Systems', 'Elmasri & Navathe', 'Pearson', '7th', 3, 'ISSUED'),
+('B006-1', '9780133970777', 'Fundamentals of Database Systems', 'Elmasri & Navathe', 3, 'ISSUED'),
 
-('B006-2', '9780133970777', 'Fundamentals of Database Systems', 'Elmasri & Navathe', 'Pearson', '7th', 3, 'AVAILABLE'),
+('B006-2', '9780133970777', 'Fundamentals of Database Systems', 'Elmasri & Navathe', 3, 'AVAILABLE'),
 
-('B007-1', '9780133594140', 'Computer Networking', 'Kurose & Ross', 'Pearson', '7th', 4, 'AVAILABLE'),
+('B007-1', '9780133594140', 'Computer Networking', 'Kurose & Ross', 4, 'AVAILABLE'),
 
-('B007-2', '9780133594140', 'Computer Networking', 'Kurose & Ross', 'Pearson', '7th', 4, 'ISSUED'),
+('B007-2', '9780133594140', 'Computer Networking', 'Kurose & Ross', 4, 'ISSUED'),
 
-('B008-1', '9780132126953', 'Computer Networks', 'Andrew Tanenbaum', 'Pearson', '5th', 4, 'ISSUED'),
+('B008-1', '9780132126953', 'Computer Networks', 'Andrew Tanenbaum', 4, 'ISSUED'),
 
-('B008-2', '9780132126953', 'Computer Networks', 'Andrew Tanenbaum', 'Pearson', '5th', 4, 'AVAILABLE'),
+('B008-2', '9780132126953', 'Computer Networks', 'Andrew Tanenbaum', 4, 'AVAILABLE'),
 
-('B009-1', '9781118063330', 'Operating System Concepts', 'Silberschatz', 'Wiley', '9th', 5, 'AVAILABLE'),
+('B009-1', '9781118063330', 'Operating System Concepts', 'Silberschatz', 5, 'AVAILABLE'),
 
-('B009-2', '9781118063330', 'Operating System Concepts', 'Silberschatz', 'Wiley', '9th', 5, 'ISSUED'),
+('B009-2', '9781118063330', 'Operating System Concepts', 'Silberschatz', 5, 'ISSUED'),
 
-('B010-1', '9780133591620', 'Modern Operating Systems', 'Andrew Tanenbaum', 'Pearson', '4th', 5, 'DAMAGED'),
+('B010-1', '9780133591620', 'Modern Operating Systems', 'Andrew Tanenbaum', 5, 'DAMAGED'),
 
-('B010-2', '9780133591620', 'Modern Operating Systems', 'Andrew Tanenbaum', 'Pearson', '4th', 5, 'AVAILABLE'),
+('B010-2', '9780133591620', 'Modern Operating Systems', 'Andrew Tanenbaum', 5, 'AVAILABLE'),
 
-('B011-1', '9780134610993', 'Artificial Intelligence: A Modern Approach', 'Russell & Norvig', 'Pearson', '4th', 6, 'LOST'),
+('B011-1', '9780134610993', 'Artificial Intelligence: A Modern Approach', 'Russell & Norvig', 6, 'LOST'),
 
-('B011-2', '9780134610993', 'Artificial Intelligence: A Modern Approach', 'Russell & Norvig', 'Pearson', '4th', 6, 'ISSUED'),
+('B011-2', '9780134610993', 'Artificial Intelligence: A Modern Approach', 'Russell & Norvig', 6, 'ISSUED'),
 
-('B012-1', '9781492032649', 'Hands-On Machine Learning', 'Aurélien Géron', 'O\'Reilly', '3rd', 6, 'ISSUED'),
+('B012-1', '9781492032649', 'Hands-On Machine Learning', 'Aurélien Géron', 6, 'ISSUED'),
 
-('B012-2', '9781492032649', 'Hands-On Machine Learning', 'Aurélien Géron', 'O\'Reilly', '3rd', 6, 'AVAILABLE'),
+('B012-2', '9781492032649', 'Hands-On Machine Learning', 'Aurélien Géron', 6, 'AVAILABLE'),
 
-('B013-1', '9780134545813', 'Digital Design', 'M. Morris Mano', 'Pearson', '6th', 7, 'AVAILABLE'),
+('B013-1', '9780134545813', 'Digital Design', 'M. Morris Mano', 7, 'AVAILABLE'),
 
-('B013-2', '9780134545813', 'Digital Design', 'M. Morris Mano', 'Pearson', '6th', 7, 'ISSUED'),
+('B013-2', '9780134545813', 'Digital Design', 'M. Morris Mano', 7, 'ISSUED'),
 
-('B014-1', '9780198063245', 'Microelectronic Circuits', 'Sedra & Smith', 'Oxford University Press', '6th', 7, 'AVAILABLE'),
+('B014-1', '9780198063245', 'Microelectronic Circuits', 'Sedra & Smith', 7, 'AVAILABLE'),
 
-('B014-2', '9780198063245', 'Microelectronic Circuits', 'Sedra & Smith', 'Oxford University Press', '6th', 7, 'ISSUED'),
+('B014-2', '9780198063245', 'Microelectronic Circuits', 'Sedra & Smith', 7, 'ISSUED'),
 
-('B015-1', '9788131806066', 'Engineering Mechanics', 'R.S. Khurmi', 'S. Chand', '1st', 8, 'LOST'),
+('B015-1', '9788131806066', 'Engineering Mechanics', 'R.S. Khurmi', 8, 'LOST'),
 
-('B015-2', '9788131806066', 'Engineering Mechanics', 'R.S. Khurmi', 'S. Chand', '1st', 8, 'ISSUED'),
+('B015-2', '9788131806066', 'Engineering Mechanics', 'R.S. Khurmi', 8, 'ISSUED'),
 
-('B016-1', '9788121916290', 'Strength of Materials', 'R.K. Rajput', 'S. Chand', '5th', 8, 'DAMAGED'),
+('B016-1', '9788121916290', 'Strength of Materials', 'R.K. Rajput', 8, 'DAMAGED'),
 
-('B016-2', '9788121916290', 'Strength of Materials', 'R.K. Rajput', 'S. Chand', '5th', 8, 'AVAILABLE');
+('B016-2', '9788121916290', 'Strength of Materials', 'R.K. Rajput', 8, 'AVAILABLE');
 
 
 -- BORROW REQUESTS
