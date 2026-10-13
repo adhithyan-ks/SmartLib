@@ -155,6 +155,10 @@ public class StudentDashboardPanel extends JPanel {
         try {
             Student student = app.getLoggedInStudent();
             if (student == null) return;
+            if (!student.isActive()) {
+                JOptionPane.showMessageDialog(this, "Your account is inactive. You cannot initiate borrowing requests.", "Account Inactive", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             
             String accessionId = bookService.getFirstAvailableBookId(isbn);
             if (accessionId == null) {

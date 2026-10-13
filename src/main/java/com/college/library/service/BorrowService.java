@@ -38,6 +38,9 @@ public class BorrowService {
     public void issueBook(String studentId, String bookId, int librarianId) throws LibraryException {
         Student student = studentDAO.findById(studentId)
                 .orElseThrow(() -> new LibraryException("Student not found."));
+        if (!student.isActive()) {
+            throw new LibraryException("Cannot issue book: Student account is inactive.");
+        }
         
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -187,6 +190,12 @@ public class BorrowService {
     
     // Borrow Request Methods
     public void requestToBorrow(String studentId, String bookId) throws LibraryException {
+        Student student = studentDAO.findById(studentId)
+                .orElseThrow(() -> new LibraryException("Student not found."));
+        if (!student.isActive()) {
+            throw new LibraryException("Cannot request book: Student account is inactive.");
+        }
+
         Optional<Book> bookOpt = bookDAO.findById(bookId);
         if (bookOpt.isEmpty()) {
             throw new LibraryException("Book not found.");

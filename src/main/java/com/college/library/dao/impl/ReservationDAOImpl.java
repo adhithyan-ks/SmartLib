@@ -157,6 +157,24 @@ public class ReservationDAOImpl implements ReservationDAO {
         return list;
     }
 
+    @Override
+    public List<Reservation> findByStudentId(String studentId) throws LibraryException {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations WHERE student_id = ? ORDER BY request_date DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToReservation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Error finding reservations for student: " + e.getMessage(), e);
+        }
+        return list;
+    }
+
     private Reservation mapResultSetToReservation(ResultSet rs) throws SQLException {
         Reservation res = new Reservation();
         res.setId(rs.getInt("id"));

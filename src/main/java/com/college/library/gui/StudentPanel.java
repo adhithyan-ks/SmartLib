@@ -14,6 +14,7 @@ public class StudentPanel extends JPanel {
     private StudentService studentService;
     private DefaultTableModel tableModel;
     private JTable studentTable;
+    private JButton toggleStatusBtn;
 
     public StudentPanel(MainApplication app, StudentService studentService) {
         this.app = app;
@@ -26,7 +27,7 @@ public class StudentPanel extends JPanel {
         topPanel.add(backBtn);
         add(topPanel, BorderLayout.NORTH);
 
-        String[] columns = {"KTU ID", "Name", "Branch", "Semester", "Batch", "Email", "Phone"};
+        String[] columns = {"KTU ID", "Name", "Branch", "Semester", "Batch", "Email", "Phone", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -34,22 +35,30 @@ public class StudentPanel extends JPanel {
             }
         };
         studentTable = new JTable(tableModel);
+        studentTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                updateToggleStatusButton();
+            }
+        });
         add(new JScrollPane(studentTable), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout());
         JButton addBtn = new JButton("Add Student");
+        toggleStatusBtn = new JButton("Deactivate Student");
         JButton deleteBtn = new JButton("Delete Student");
         
         addBtn.addActionListener(e -> showAddDialog());
+        toggleStatusBtn.addActionListener(e -> toggleSelectedStudentStatus());
         deleteBtn.addActionListener(e -> deleteSelectedStudent());
         
         bottomPanel.add(addBtn);
+        bottomPanel.add(toggleStatusBtn);
         bottomPanel.add(deleteBtn);
         add(bottomPanel, BorderLayout.SOUTH);
         
         // Setup custom table selection behavior
         TableSelectionHelper.setupMutuallyExclusiveTables(studentTable);
-        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{studentTable}, deleteBtn);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{studentTable}, deleteBtn, toggleStatusBtn);
     }
 
     public void refreshData() {
@@ -64,12 +73,14 @@ public class StudentPanel extends JPanel {
                     s.getSemester(),
                     s.getBatch(),
                     s.getEmail(),
-                    s.getPhone()
+                    s.getPhone(),
+                    s.getStatus() != null ? s.getStatus() : "ACTIVE"
                 });
             }
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, "Error loading students: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+        updateToggleStatusButton();
     }
 
     private void showAddDialog() {
@@ -169,6 +180,46 @@ public class StudentPanel extends JPanel {
         }
     }
 
+    private void toggleSelectedStudentStatus() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a student first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String id = (String) tableModel.getValueAt(selectedRow, 0);
+        String status = (String) tableModel.getValueAt(selectedRow, 7);
+
+        try {
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                studentService.activateStudent(id);
+                JOptionPane.showMessageDialog(this, "Student " + id + " activated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                studentService.deactivateStudent(id);
+                JOptionPane.showMessageDialog(this, "Student " + id + " deactivated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            refreshData();
+            studentTable.clearSelection();
+            updateToggleStatusButton();
+        } catch (LibraryException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateToggleStatusButton() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow != -1 && selectedRow < tableModel.getRowCount()) {
+            String status = (String) tableModel.getValueAt(selectedRow, 7);
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                toggleStatusBtn.setText("Activate Student");
+            } else {
+                toggleStatusBtn.setText("Deactivate Student");
+            }
+        } else {
+            toggleStatusBtn.setText("Deactivate Student");
+        }
+    }
+
     private void deleteSelectedStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -181,10 +232,12 @@ public class StudentPanel extends JPanel {
         if (option == JOptionPane.YES_OPTION) {
             try {
                 studentService.deleteStudent(id);
+                JOptionPane.showMessageDialog(this, "Student " + id + " deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshData();
                 studentTable.clearSelection();
+                updateToggleStatusButton();
             } catch (LibraryException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Cannot Delete Student", JOptionPane.WARNING_MESSAGE);
             }
         }
     }

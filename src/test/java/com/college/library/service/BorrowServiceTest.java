@@ -75,6 +75,11 @@ class BorrowServiceTest {
         StudentDAO mockStudentDAO = new StudentDAO() {
             @Override public void create(Student s) {}
             @Override public Optional<Student> findById(String id) {
+                if ("INACTIVE_STU".equals(id)) {
+                    Student s = new Student();
+                    s.setStatus("INACTIVE");
+                    return Optional.of(s);
+                }
                 return "VALID_STU".equals(id) ? Optional.of(new Student()) : Optional.empty();
             }
             @Override public java.util.List<Student> findAll() { return null; }
@@ -125,5 +130,22 @@ class BorrowServiceTest {
     @Test
     void testIssueBookFailsIfNotAvailable() {
         assertThrows(LibraryException.class, () -> borrowService.issueBook("VALID_STU", "ISSUED_BOOK", 1));
+    }
+
+    @Test
+    void testIssueBookFailsIfStudentInactive() {
+        LibraryException ex = assertThrows(LibraryException.class, () -> borrowService.issueBook("INACTIVE_STU", "AVAILABLE_BOOK", 1));
+        assertTrue(ex.getMessage().contains("Student account is inactive"));
+    }
+
+    @Test
+    void testRequestToBorrowFailsIfStudentInactive() {
+        LibraryException ex = assertThrows(LibraryException.class, () -> borrowService.requestToBorrow("INACTIVE_STU", "AVAILABLE_BOOK"));
+        assertTrue(ex.getMessage().contains("Student account is inactive"));
+    }
+
+    @Test
+    void testRequestToBorrowSuccessForActiveStudent() throws Exception {
+        borrowService.requestToBorrow("VALID_STU", "AVAILABLE_BOOK");
     }
 }

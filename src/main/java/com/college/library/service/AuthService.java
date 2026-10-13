@@ -67,6 +67,10 @@ public class AuthService {
             throw new LibraryException("Account exists but not registered for login. Please register first.");
         }
         
+        if (!student.isActive()) {
+            throw new LibraryException("Student account is inactive. Please contact the librarian.");
+        }
+
         if (BCrypt.checkpw(password, student.getPasswordHash())) {
             return student;
         } else {
@@ -86,6 +90,9 @@ public class AuthService {
         Optional<com.college.library.model.Student> existingOpt = studentDAO.findById(ktuId);
         if (existingOpt.isPresent()) {
             com.college.library.model.Student existing = existingOpt.get();
+            if (!existing.isActive()) {
+                throw new LibraryException("Student account is inactive. Please contact the librarian.");
+            }
             if (existing.getPasswordHash() != null) {
                 throw new LibraryException("Student already registered. Please login.");
             }

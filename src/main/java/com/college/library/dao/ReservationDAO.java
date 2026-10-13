@@ -14,4 +14,7 @@ public interface ReservationDAO extends CrudDAO<Reservation, Integer> {
     Optional<Reservation> findOldestPendingByIsbn(String isbn, Connection conn) throws SQLException;
     List<Reservation> findPendingByStudentId(String studentId) throws LibraryException;
     List<Reservation> findPendingByIsbn(String isbn) throws LibraryException;
+    default List<Reservation> findByStudentId(String studentId) throws LibraryException {
+        return java.util.Collections.emptyList();
+    }
 }

@@ -21,6 +21,9 @@ public class ReservationService {
     public String addReservation(String studentId, String bookIsbn) throws LibraryException {
         com.college.library.model.Student student = studentDAO.findById(studentId)
             .orElseThrow(() -> new LibraryException("Student not found."));
+        if (!student.isActive()) {
+            throw new LibraryException("Cannot place reservation: Student account is inactive.");
+        }
             
         java.util.List<com.college.library.model.Book> books = bookDAO.findByIsbn(bookIsbn);
         if (books.isEmpty()) {

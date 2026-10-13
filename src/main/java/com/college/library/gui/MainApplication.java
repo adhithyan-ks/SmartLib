@@ -37,9 +37,10 @@ public class MainApplication extends JFrame {
     }
     
     private void initServices() {
+        com.college.library.Migration.run();
         authService = new AuthService(new LibrarianDAOImpl());
         bookService = new BookService(new BookDAOImpl());
-        studentService = new StudentService(new StudentDAOImpl());
+        studentService = new StudentService(new StudentDAOImpl(), new BorrowTransactionDAOImpl(), new ReservationDAOImpl(), new BorrowRequestDAOImpl());
         borrowService = new BorrowService(new BorrowTransactionDAOImpl(), new BookDAOImpl(), new StudentDAOImpl(), new ReservationDAOImpl(), new BorrowRequestDAOImpl());
         reservationService = new ReservationService(new ReservationDAOImpl(), new StudentDAOImpl(), new BookDAOImpl());
         analyticsService = new AnalyticsService(new BookDAOImpl(), new StudentDAOImpl(), new BorrowTransactionDAOImpl());

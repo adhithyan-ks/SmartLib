@@ -44,6 +44,13 @@ public class StudentAuthTest {
                 authService.loginStudent(ktuId, "wrongpassword");
             });
             
+            // 6. Inactive student cannot login
+            s.setStatus("INACTIVE");
+            studentDAO.update(s);
+            assertThrows(LibraryException.class, () -> {
+                authService.loginStudent(ktuId, password);
+            });
+            
             // Cleanup
             studentDAO.delete(ktuId);
         } catch (Exception e) {

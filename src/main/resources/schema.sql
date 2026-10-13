@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS students (
     semester INT,
     batch VARCHAR(10),
     email VARCHAR(100),
-    phone VARCHAR(20)
+    phone VARCHAR(20),
+    status VARCHAR(20) DEFAULT 'ACTIVE'
 );
 
 CREATE TABLE IF NOT EXISTS categories (
