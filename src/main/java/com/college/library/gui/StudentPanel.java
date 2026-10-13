@@ -139,7 +139,7 @@ public class StudentPanel extends JPanel {
         // Auto-select batch and branch when valid KTU ID is typed
         Runnable updateAutoSelect = () -> {
             String currentKtuId = idField.getText().trim();
-            if (currentKtuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+            if (currentKtuId.matches("^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$")) {
                 String yearCode = currentKtuId.substring(3, 5);
                 int startYear = 2000 + Integer.parseInt(yearCode);
                 String batch = startYear + "-" + (startYear + 4);
@@ -197,7 +197,7 @@ public class StudentPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "KTU ID and Name are required.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (!ktuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+            if (!ktuId.matches("^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$")) {
                 JOptionPane.showMessageDialog(this, "Invalid KTU ID format.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }

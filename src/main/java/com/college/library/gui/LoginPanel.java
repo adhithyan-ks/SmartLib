@@ -273,7 +273,7 @@ public class LoginPanel extends JPanel {
             return;
         }
 
-        if (!ktuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+        if (!ktuId.matches("^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$")) {
             JOptionPane.showMessageDialog(this, "Invalid KTU ID format.", "Login Error", JOptionPane.ERROR_MESSAGE);
             stuIdField.setText("");
             stuPassField.setText("");
@@ -321,7 +321,7 @@ public class LoginPanel extends JPanel {
         
         // If they already typed a valid KTU ID, pre-fill it and auto-select branch/batch
         String currentKtuId = stuIdField.getText().trim();
-        if (currentKtuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+        if (currentKtuId.matches("^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$")) {
             ktuIdField.setText(currentKtuId);
             
             String yearCode = currentKtuId.substring(3, 5);
@@ -386,7 +386,7 @@ public class LoginPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "All fields are required.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (!ktuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")) {
+            if (!ktuId.matches("^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$")) {
                 JOptionPane.showMessageDialog(this, "Invalid KTU ID format.", "Registration Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
