@@ -5,6 +5,7 @@ import com.college.library.model.BorrowRequest;
 import com.college.library.service.BorrowService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -19,93 +20,132 @@ public class BorrowPanel extends JPanel {
 
     private JTable requestsTable;
     private DefaultTableModel requestsTableModel;
+    private JButton approveBtn;
+    private JButton rejectBtn;
+    private JButton issueBtn;
+    private JButton returnBtn;
 
     public BorrowPanel(MainApplication app, BorrowService borrowService) {
         this.app = app;
         this.borrowService = borrowService;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UITheme.BG_APP);
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton backBtn = new JButton("Back to Dashboard");
+        // 1. Top Header Navbar
+        JButton backBtn = UITheme.createBackButton("Dashboard");
         backBtn.addActionListener(e -> app.navigateTo("DASHBOARD"));
-        topPanel.add(backBtn);
-        add(topPanel, BorderLayout.NORTH);
 
-        JPanel mainContentPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel header = UITheme.createHeaderPanel(
+                "Circulation Desk",
+                "Issue books, process returns, and approve student requests",
+                backBtn
+        );
+        add(header, BorderLayout.NORTH);
+
+        // 2. Main Content Container
+        JPanel mainContentPanel = new JPanel();
+        mainContentPanel.setLayout(new BoxLayout(mainContentPanel, BoxLayout.Y_AXIS));
+        mainContentPanel.setOpaque(false);
+        mainContentPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
         
-        // Top section: Issue and Return
-        JPanel formsPanel = new JPanel(new GridLayout(1, 2, 20, 20));
+        // --- Forms Section (Issue & Return Cards) ---
+        JPanel formsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
+        formsPanel.setOpaque(false);
+        formsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
         
-        // Issue Panel
-        JPanel issueWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        JPanel issuePanel = new JPanel(new GridLayout(4, 2, 20, 15));
-        issuePanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder("Manual Issue"),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-        issuePanel.add(new JLabel("Student KTU ID:"));
-        issueStudentIdField = new JTextField(15);
-        issuePanel.add(issueStudentIdField);
-        issuePanel.add(new JLabel("Book Accession ID:"));
-        issueBookIdField = new JTextField(15);
-        issuePanel.add(issueBookIdField);
-        issuePanel.add(new JLabel("")); // spacer
-        JButton issueBtn = new JButton("Issue Book");
+        // Manual Issue Card
+        UITheme.CardPanel issueCard = new UITheme.CardPanel(new BorderLayout(0, 12));
+        JLabel issueTitle = UITheme.createSectionHeader("Direct Book Issue");
+        issueCard.add(issueTitle, BorderLayout.NORTH);
+
+        JPanel issueFields = new JPanel(new GridLayout(2, 2, 12, 10));
+        issueFields.setOpaque(false);
+        issueFields.add(new JLabel("Student KTU ID:"));
+        issueStudentIdField = UITheme.createTextField(15);
+        issueFields.add(issueStudentIdField);
+        issueFields.add(new JLabel("Book Accession ID:"));
+        issueBookIdField = UITheme.createTextField(15);
+        issueFields.add(issueBookIdField);
+        issueCard.add(issueFields, BorderLayout.CENTER);
+
+        JPanel issueActionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        issueActionPanel.setOpaque(false);
+        issueBtn = UITheme.createPrimaryButton("Issue Book");
         issueBtn.addActionListener(e -> attemptIssue());
-        issuePanel.add(issueBtn);
-        issueWrapper.add(issuePanel);
-        
-        // Return Panel
-        JPanel returnWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        JPanel returnPanel = new JPanel(new GridLayout(3, 2, 20, 15));
-        returnPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder("Manual Return"),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-        returnPanel.add(new JLabel("Book Accession ID:"));
-        returnBookIdField = new JTextField(15);
-        returnPanel.add(returnBookIdField);
-        returnPanel.add(new JLabel("")); // spacer
-        JButton returnBtn = new JButton("Return Book");
-        returnBtn.addActionListener(e -> attemptReturn());
-        returnPanel.add(returnBtn);
-        returnWrapper.add(returnPanel);
-        
-        formsPanel.add(issueWrapper);
-        formsPanel.add(returnWrapper);
-        mainContentPanel.add(formsPanel, BorderLayout.NORTH);
+        issueActionPanel.add(issueBtn);
+        issueCard.add(issueActionPanel, BorderLayout.SOUTH);
 
-        // Bottom section: Pending Requests
-        JPanel requestsPanel = new JPanel(new BorderLayout(5, 5));
-        requestsPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder("Pending Borrow Requests"),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+        // Manual Return Card
+        UITheme.CardPanel returnCard = new UITheme.CardPanel(new BorderLayout(0, 12));
+        JLabel returnTitle = UITheme.createSectionHeader("Direct Book Return");
+        returnCard.add(returnTitle, BorderLayout.NORTH);
+
+        JPanel returnFields = new JPanel(new GridLayout(2, 2, 12, 10));
+        returnFields.setOpaque(false);
+        returnFields.add(new JLabel("Book Accession ID:"));
+        returnBookIdField = UITheme.createTextField(15);
+        returnFields.add(returnBookIdField);
+        returnFields.add(new JLabel("")); // spacer
+        returnFields.add(new JLabel("")); // spacer
+        returnCard.add(returnFields, BorderLayout.CENTER);
+
+        JPanel returnActionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        returnActionPanel.setOpaque(false);
+        returnBtn = UITheme.createSuccessButton("Return Book");
+        returnBtn.addActionListener(e -> attemptReturn());
+        returnActionPanel.add(returnBtn);
+        returnCard.add(returnActionPanel, BorderLayout.SOUTH);
+
+        formsPanel.add(issueCard);
+        formsPanel.add(returnCard);
+        mainContentPanel.add(formsPanel);
+        mainContentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // --- Bottom section: Pending Requests Card ---
+        UITheme.CardPanel requestsCard = new UITheme.CardPanel(new BorderLayout(0, 12));
         
+        JPanel reqHeaderPanel = new JPanel(new BorderLayout());
+        reqHeaderPanel.setOpaque(false);
+        JLabel reqTitle = UITheme.createSectionHeader("Pending Student Borrow Requests");
+        reqHeaderPanel.add(reqTitle, BorderLayout.WEST);
+
+        JPanel reqActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        reqActionsPanel.setOpaque(false);
+        approveBtn = UITheme.createSuccessButton("Approve Request");
+        approveBtn.addActionListener(e -> approveRequest());
+        rejectBtn = UITheme.createDangerButton("Reject Request");
+        rejectBtn.addActionListener(e -> rejectRequest());
+        reqActionsPanel.add(approveBtn);
+        reqActionsPanel.add(rejectBtn);
+        reqHeaderPanel.add(reqActionsPanel, BorderLayout.EAST);
+
+        requestsCard.add(reqHeaderPanel, BorderLayout.NORTH);
+
         String[] reqCols = {"Request ID", "Student ID", "Book ID", "Request Date"};
         requestsTableModel = new DefaultTableModel(reqCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         requestsTable = new JTable(requestsTableModel);
-        requestsPanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
-        
-        JPanel reqActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton approveBtn = new JButton("Approve Request");
-        approveBtn.addActionListener(e -> approveRequest());
-        JButton rejectBtn = new JButton("Reject Request");
-        rejectBtn.addActionListener(e -> rejectRequest());
-        reqActionsPanel.add(approveBtn);
-        reqActionsPanel.add(rejectBtn);
-        requestsPanel.add(reqActionsPanel, BorderLayout.SOUTH);
-        
-        mainContentPanel.add(requestsPanel, BorderLayout.CENTER);
+        UITheme.styleTable(requestsTable);
+
+        requestsTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        requestsTable.getColumnModel().getColumn(1).setPreferredWidth(160);
+        requestsTable.getColumnModel().getColumn(2).setPreferredWidth(180);
+        requestsTable.getColumnModel().getColumn(3).setPreferredWidth(220);
+
+        JScrollPane scrollPane = new JScrollPane(requestsTable);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        scrollPane.getViewport().setBackground(UITheme.BG_CARD);
+
+        requestsCard.add(scrollPane, BorderLayout.CENTER);
+        mainContentPanel.add(requestsCard);
 
         add(mainContentPanel, BorderLayout.CENTER);
         
         // Setup custom table selection behavior
         TableSelectionHelper.setupMutuallyExclusiveTables(requestsTable);
-        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{requestsTable}, approveBtn, rejectBtn);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{requestsTable}, approveBtn, rejectBtn, issueBtn, returnBtn);
     }
     
     public void refreshData() {
@@ -138,7 +178,7 @@ public class BorrowPanel extends JPanel {
             if (app.getLoggedInUser() == null) throw new LibraryException("Librarian not logged in!");
             int librarianId = app.getLoggedInUser().getId();
             borrowService.issueBook(issueStudentIdField.getText().trim(), issueBookIdField.getText().trim(), librarianId);
-            JOptionPane.showMessageDialog(this, "Book successfully issued!");
+            JOptionPane.showMessageDialog(this, "Book successfully issued!", "Success", JOptionPane.INFORMATION_MESSAGE);
             refreshData();
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -150,7 +190,7 @@ public class BorrowPanel extends JPanel {
             if (app.getLoggedInUser() == null) throw new LibraryException("Librarian not logged in!");
             int librarianId = app.getLoggedInUser().getId();
             String msg = borrowService.returnBook(returnBookIdField.getText().trim(), librarianId);
-            JOptionPane.showMessageDialog(this, msg);
+            JOptionPane.showMessageDialog(this, msg, "Success", JOptionPane.INFORMATION_MESSAGE);
             refreshData();
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

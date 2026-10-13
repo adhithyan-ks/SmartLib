@@ -8,6 +8,7 @@ import com.college.library.service.ReservationService;
 import com.college.library.service.BookService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -21,6 +22,8 @@ public class StudentDashboardPanel extends JPanel {
     private JTable searchTable;
     private DefaultTableModel searchTableModel;
     private JTextField searchField;
+    private JButton requestBtn;
+    private JLabel studentGreetingLbl;
 
     private JTable requestsTable;
     private DefaultTableModel requestsTableModel;
@@ -36,92 +39,160 @@ public class StudentDashboardPanel extends JPanel {
         this.borrowService = borrowService;
         this.reservationService = reservationService;
         this.bookService = bookService;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UITheme.BG_APP);
 
-        // Top Navbar
-        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton logoutBtn = new JButton("Logout");
+        // 1. Top Navbar Header
+        JButton logoutBtn = UITheme.createSecondaryButton("Sign Out");
         logoutBtn.addActionListener(e -> {
             app.setLoggedInStudent(null);
             app.navigateTo("LOGIN");
         });
-        navPanel.add(logoutBtn);
-        add(navPanel, BorderLayout.NORTH);
 
-        // Center Panel for Tables
-        JPanel centerPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        studentGreetingLbl = new JLabel("Student Library Portal");
+        studentGreetingLbl.setFont(UITheme.FONT_SUBTITLE);
+        studentGreetingLbl.setForeground(UITheme.TEXT_SECONDARY);
 
-        // 1. Search Table
-        JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
-        searchPanel.setBorder(BorderFactory.createTitledBorder("Book Search & Availability"));
-        
-        JPanel searchBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchField = new JTextField(15);
-        JButton searchBtn = new JButton("Search");
+        JPanel header = UITheme.createHeaderPanel(
+                "Student Portal",
+                "Search books, track loans, view requests, and check reservations",
+                null,
+                logoutBtn
+        );
+        add(header, BorderLayout.NORTH);
+
+        // 2. Center 2x2 Grid for Content Cards
+        JPanel centerGrid = new JPanel(new GridLayout(2, 2, 16, 16));
+        centerGrid.setOpaque(false);
+        centerGrid.setBorder(new EmptyBorder(16, 20, 16, 20));
+
+        // --- Card 1: Search & Request to Borrow ---
+        UITheme.CardPanel searchCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        searchCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        JPanel searchHeader = new JPanel(new BorderLayout(8, 0));
+        searchHeader.setOpaque(false);
+        JLabel searchTitle = UITheme.createSectionHeader("Book Search & Availability");
+        searchHeader.add(searchTitle, BorderLayout.WEST);
+
+        JPanel searchControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        searchControls.setOpaque(false);
+        searchField = UITheme.createTextField(10);
+        searchField.setPreferredSize(new Dimension(130, 32));
+        searchField.addActionListener(e -> performSearch());
+
+        JButton searchBtn = UITheme.createSecondaryButton("Search");
         searchBtn.addActionListener(e -> performSearch());
-        searchBar.add(new JLabel("Search: "));
-        searchBar.add(searchField);
-        searchBar.add(searchBtn);
-        searchPanel.add(searchBar, BorderLayout.NORTH);
 
-        String[] searchCols = {"ISBN", "Title", "Author", "Category", "Available Copies"};
+        requestBtn = UITheme.createPrimaryButton("Request Borrow");
+        requestBtn.addActionListener(e -> requestToBorrow());
+
+        searchControls.add(searchField);
+        searchControls.add(searchBtn);
+        searchControls.add(requestBtn);
+        searchHeader.add(searchControls, BorderLayout.EAST);
+        searchCard.add(searchHeader, BorderLayout.NORTH);
+
+        String[] searchCols = {"ISBN", "Title", "Author", "Category", "Available"};
         searchTableModel = new DefaultTableModel(searchCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         searchTable = new JTable(searchTableModel);
-        searchPanel.add(new JScrollPane(searchTable), BorderLayout.CENTER);
-        
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton requestBtn = new JButton("Request to Borrow");
-        requestBtn.addActionListener(e -> requestToBorrow());
-        actionPanel.add(requestBtn);
-        searchPanel.add(actionPanel, BorderLayout.SOUTH);
-        
-        centerPanel.add(searchPanel);
+        UITheme.styleTable(searchTable);
+        searchTable.getColumnModel().getColumn(0).setPreferredWidth(90);
+        searchTable.getColumnModel().getColumn(1).setPreferredWidth(140);
+        searchTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+        searchTable.getColumnModel().getColumn(3).setPreferredWidth(80);
+        searchTable.getColumnModel().getColumn(4).setPreferredWidth(70);
 
-        // 2. My Borrow Requests Table
-        JPanel reqPanel = new JPanel(new BorderLayout());
-        reqPanel.setBorder(BorderFactory.createTitledBorder("My Borrow Requests"));
+        JScrollPane searchScroll = new JScrollPane(searchTable);
+        searchScroll.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        searchScroll.getViewport().setBackground(UITheme.BG_CARD);
+        searchCard.add(searchScroll, BorderLayout.CENTER);
+        centerGrid.add(searchCard);
+
+        // --- Card 2: My Borrow Requests ---
+        UITheme.CardPanel reqCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        reqCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        JLabel reqTitle = UITheme.createSectionHeader("My Borrow Requests");
+        reqCard.add(reqTitle, BorderLayout.NORTH);
+
         String[] reqCols = {"Title", "Request Date", "Status"};
         requestsTableModel = new DefaultTableModel(reqCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         requestsTable = new JTable(requestsTableModel);
-        reqPanel.add(new JScrollPane(requestsTable), BorderLayout.CENTER);
-        centerPanel.add(reqPanel);
+        UITheme.styleTable(requestsTable);
+        requestsTable.getColumnModel().getColumn(0).setPreferredWidth(180);
+        requestsTable.getColumnModel().getColumn(1).setPreferredWidth(140);
+        requestsTable.getColumnModel().getColumn(2).setPreferredWidth(90);
 
-        // 3. History Table
-        String[] historyCols = {"Transaction ID", "Book ID", "Issue Date", "Due Date", "Return Date", "Fine", "Status"};
+        JScrollPane reqScroll = new JScrollPane(requestsTable);
+        reqScroll.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        reqScroll.getViewport().setBackground(UITheme.BG_CARD);
+        reqCard.add(reqScroll, BorderLayout.CENTER);
+        centerGrid.add(reqCard);
+
+        // --- Card 3: My History & Active Loans ---
+        UITheme.CardPanel historyCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        historyCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        JLabel histTitle = UITheme.createSectionHeader("My Borrowing History & Active Loans");
+        historyCard.add(histTitle, BorderLayout.NORTH);
+
+        String[] historyCols = {"Tx ID", "Book ID", "Issue Date", "Due Date", "Return Date", "Fine", "Status"};
         historyTableModel = new DefaultTableModel(historyCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         historyTable = new JTable(historyTableModel);
-        JPanel historyPanel = new JPanel(new BorderLayout());
-        historyPanel.setBorder(BorderFactory.createTitledBorder("My Borrowing History & Active Loans"));
-        historyPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
-        centerPanel.add(historyPanel);
+        UITheme.styleTable(historyTable);
+        historyTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+        historyTable.getColumnModel().getColumn(1).setPreferredWidth(80);
+        historyTable.getColumnModel().getColumn(2).setPreferredWidth(85);
+        historyTable.getColumnModel().getColumn(3).setPreferredWidth(85);
+        historyTable.getColumnModel().getColumn(4).setPreferredWidth(85);
+        historyTable.getColumnModel().getColumn(5).setPreferredWidth(60);
+        historyTable.getColumnModel().getColumn(6).setPreferredWidth(85);
 
-        // 4. Reservation Table
-        String[] resCols = {"Reservation ID", "Book ISBN", "Book Title", "Request Date", "Queue Position", "Status"};
+        JScrollPane histScroll = new JScrollPane(historyTable);
+        histScroll.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        histScroll.getViewport().setBackground(UITheme.BG_CARD);
+        historyCard.add(histScroll, BorderLayout.CENTER);
+        centerGrid.add(historyCard);
+
+        // --- Card 4: My Reservations ---
+        UITheme.CardPanel resCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        resCard.setBorder(new EmptyBorder(12, 12, 12, 12));
+        JLabel resTitle = UITheme.createSectionHeader("My Book Reservations");
+        resCard.add(resTitle, BorderLayout.NORTH);
+
+        String[] resCols = {"Res ID", "ISBN", "Book Title", "Request Date", "Queue", "Status"};
         reservationTableModel = new DefaultTableModel(resCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         reservationTable = new JTable(reservationTableModel);
-        JPanel resPanel = new JPanel(new BorderLayout());
-        resPanel.setBorder(BorderFactory.createTitledBorder("My Reservations"));
-        resPanel.add(new JScrollPane(reservationTable), BorderLayout.CENTER);
-        centerPanel.add(resPanel);
+        UITheme.styleTable(reservationTable);
+        reservationTable.getColumnModel().getColumn(0).setPreferredWidth(55);
+        reservationTable.getColumnModel().getColumn(1).setPreferredWidth(90);
+        reservationTable.getColumnModel().getColumn(2).setPreferredWidth(140);
+        reservationTable.getColumnModel().getColumn(3).setPreferredWidth(90);
+        reservationTable.getColumnModel().getColumn(4).setPreferredWidth(60);
+        reservationTable.getColumnModel().getColumn(5).setPreferredWidth(85);
 
-        add(centerPanel, BorderLayout.CENTER);
+        JScrollPane resScroll = new JScrollPane(reservationTable);
+        resScroll.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        resScroll.getViewport().setBackground(UITheme.BG_CARD);
+        resCard.add(resScroll, BorderLayout.CENTER);
+        centerGrid.add(resCard);
+
+        add(centerGrid, BorderLayout.CENTER);
         
         // Setup custom table selection behavior
         TableSelectionHelper.setupMutuallyExclusiveTables(searchTable, requestsTable, historyTable, reservationTable);
-        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{searchTable, requestsTable, historyTable, reservationTable}, requestBtn);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{searchTable, requestsTable, historyTable, reservationTable}, requestBtn, searchBtn);
     }
 
     private void performSearch() {
@@ -204,8 +275,8 @@ public class StudentDashboardPanel extends JPanel {
                         t.getBookId(),
                         t.getIssueDate(),
                         t.getDueDate(),
-                        t.getReturnDate(),
-                        t.getFine(),
+                        t.getReturnDate() != null ? t.getReturnDate() : "-",
+                        String.format("₹%.2f", t.getFine()),
                         t.getStatus()
                 });
             }

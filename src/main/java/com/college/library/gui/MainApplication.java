@@ -32,6 +32,7 @@ public class MainApplication extends JFrame {
     private StudentDashboardPanel studentDashboardPanel;
 
     public MainApplication() {
+        UITheme.setupGlobalUI();
         initServices();
         initUI();
     }
@@ -50,12 +51,15 @@ public class MainApplication extends JFrame {
 
     private void initUI() {
         setTitle("SmartLib - College Library Management System");
-        setSize(800, 600);
+        setSize(1024, 680);
+        setMinimumSize(new Dimension(920, 600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        getContentPane().setBackground(UITheme.BG_APP);
         
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
+        mainPanel.setBackground(UITheme.BG_APP);
         
         loginPanel = new LoginPanel(this, authService);
         dashboardPanel = new DashboardPanel(this, analyticsService);

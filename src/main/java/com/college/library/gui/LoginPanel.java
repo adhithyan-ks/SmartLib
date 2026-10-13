@@ -5,6 +5,8 @@ import com.college.library.model.Librarian;
 import com.college.library.service.AuthService;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class LoginPanel extends JPanel {
@@ -19,61 +21,222 @@ public class LoginPanel extends JPanel {
     private JTextField stuIdField;
     private JPasswordField stuPassField;
 
+    private CardLayout formCardLayout;
+    private JPanel formCardsPanel;
+    private JButton studentTabBtn;
+    private JButton librarianTabBtn;
+
     public LoginPanel(MainApplication app, AuthService authService) {
         this.app = app;
         this.authService = authService;
+        
         setLayout(new GridBagLayout());
-        
-        JPanel container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        
-        // --- Librarian Login Panel ---
-        JPanel libPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        libPanel.setBorder(BorderFactory.createTitledBorder("Librarian Login"));
-        
-        libPanel.add(new JLabel("Username:"));
-        libUserField = new JTextField(15);
-        libPanel.add(libUserField);
-        
-        libPanel.add(new JLabel("Password:"));
-        libPassField = new JPasswordField(15);
-        libPanel.add(libPassField);
-        
-        JButton libLoginBtn = new JButton("Login as Librarian");
-        libLoginBtn.addActionListener(e -> attemptLibrarianLogin());
-        
-        libPanel.add(new JLabel("")); // spacer
-        libPanel.add(libLoginBtn);
-        
-        // --- Student Login Panel ---
-        JPanel stuPanel = new JPanel(new GridLayout(4, 2, 10, 10));
-        stuPanel.setBorder(BorderFactory.createTitledBorder("Student Login"));
-        
-        stuPanel.add(new JLabel("KTU ID:"));
-        stuIdField = new JTextField(15);
-        stuPanel.add(stuIdField);
-        
-        stuPanel.add(new JLabel("Password:"));
-        stuPassField = new JPasswordField(15);
-        stuPanel.add(stuPassField);
-        
-        JButton stuLoginBtn = new JButton("Login as Student");
+        setBackground(UITheme.BG_APP);
+
+        // Main Login Card
+        UITheme.CardPanel card = new UITheme.CardPanel(new BorderLayout(0, 20));
+        card.setPreferredSize(new Dimension(440, 520));
+        card.setCornerRadius(14);
+        card.setBorder(new EmptyBorder(32, 32, 32, 32));
+
+        // 1. Header (Brand, Logo, Title)
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setOpaque(false);
+
+        JLabel logoBadge = new JLabel("SmartLib");
+        logoBadge.setFont(UITheme.FONT_HERO);
+        logoBadge.setForeground(UITheme.PRIMARY);
+        logoBadge.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subtitleLbl = new JLabel("College Library Management System");
+        subtitleLbl.setFont(UITheme.FONT_SUBTITLE);
+        subtitleLbl.setForeground(UITheme.TEXT_SECONDARY);
+        subtitleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        headerPanel.add(logoBadge);
+        headerPanel.add(Box.createRigidArea(new Dimension(0, 4)));
+        headerPanel.add(subtitleLbl);
+        headerPanel.add(Box.createRigidArea(new Dimension(0, 16)));
+
+        // 2. Segmented Role Selector
+        JPanel selectorWrapper = new JPanel(new GridLayout(1, 2, 6, 0));
+        selectorWrapper.setBackground(UITheme.SECONDARY_BG);
+        selectorWrapper.setBorder(new CompoundBorder(
+                new UITheme.RoundedBorder(UITheme.BORDER, 8, 1),
+                new EmptyBorder(4, 4, 4, 4)
+        ));
+
+        studentTabBtn = new JButton("Student Portal");
+        librarianTabBtn = new JButton("Librarian / Staff");
+        styleSegmentedButton(studentTabBtn, true);
+        styleSegmentedButton(librarianTabBtn, false);
+
+        studentTabBtn.addActionListener(e -> switchRole(true));
+        librarianTabBtn.addActionListener(e -> switchRole(false));
+
+        selectorWrapper.add(studentTabBtn);
+        selectorWrapper.add(librarianTabBtn);
+        headerPanel.add(selectorWrapper);
+
+        card.add(headerPanel, BorderLayout.NORTH);
+
+        // 3. Forms Container with CardLayout
+        formCardLayout = new CardLayout();
+        formCardsPanel = new JPanel(formCardLayout);
+        formCardsPanel.setOpaque(false);
+
+        // --- Student Form ---
+        JPanel stuForm = createStudentForm();
+        // --- Librarian Form ---
+        JPanel libForm = createLibrarianForm();
+
+        formCardsPanel.add(stuForm, "STUDENT");
+        formCardsPanel.add(libForm, "LIBRARIAN");
+
+        card.add(formCardsPanel, BorderLayout.CENTER);
+
+        add(card);
+    }
+
+    private void styleSegmentedButton(JButton btn, boolean active) {
+        btn.setFont(UITheme.FONT_BODY_BOLD);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 32));
+        if (active) {
+            btn.setBackground(UITheme.BG_CARD);
+            btn.setForeground(UITheme.PRIMARY);
+            btn.setOpaque(true);
+        } else {
+            btn.setBackground(UITheme.SECONDARY_BG);
+            btn.setForeground(UITheme.TEXT_SECONDARY);
+            btn.setOpaque(false);
+        }
+    }
+
+    private void switchRole(boolean isStudent) {
+        styleSegmentedButton(studentTabBtn, isStudent);
+        styleSegmentedButton(librarianTabBtn, !isStudent);
+        formCardLayout.show(formCardsPanel, isStudent ? "STUDENT" : "LIBRARIAN");
+    }
+
+    private JPanel createStudentForm() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(12, 0, 0, 0));
+
+        // KTU ID
+        JLabel idLbl = new JLabel("KTU ID");
+        idLbl.setFont(UITheme.FONT_BODY_BOLD);
+        idLbl.setForeground(UITheme.TEXT_PRIMARY);
+        idLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        stuIdField = UITheme.createTextField(15);
+        stuIdField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        stuIdField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel idHint = new JLabel("Format: TVE23CS001");
+        idHint.setFont(UITheme.FONT_SMALL);
+        idHint.setForeground(UITheme.TEXT_MUTED);
+        idHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Password
+        JLabel passLbl = new JLabel("Password");
+        passLbl.setFont(UITheme.FONT_BODY_BOLD);
+        passLbl.setForeground(UITheme.TEXT_PRIMARY);
+        passLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        stuPassField = UITheme.createPasswordField(15);
+        stuPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        stuPassField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Login Action
+        JButton stuLoginBtn = UITheme.createPrimaryButton("Sign In as Student");
+        stuLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        stuLoginBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         stuLoginBtn.addActionListener(e -> attemptStudentLogin());
-        
-        JButton registerBtn = new JButton("New Student? Create Account");
+
+        // Press Enter to login
+        stuIdField.addActionListener(e -> attemptStudentLogin());
+        stuPassField.addActionListener(e -> attemptStudentLogin());
+
+        // Register Action
+        JButton registerBtn = UITheme.createSecondaryButton("New Student? Create Account");
+        registerBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        registerBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         registerBtn.addActionListener(e -> showStudentRegistrationForm());
-        
-        stuPanel.add(new JLabel("")); // spacer
-        stuPanel.add(stuLoginBtn);
-        
-        stuPanel.add(new JLabel("")); // spacer
-        stuPanel.add(registerBtn);
-        
-        container.add(libPanel);
-        container.add(Box.createRigidArea(new Dimension(0, 20))); // Spacing between panels
-        container.add(stuPanel);
-        
-        add(container);
+
+        panel.add(idLbl);
+        panel.add(Box.createRigidArea(new Dimension(0, 4)));
+        panel.add(stuIdField);
+        panel.add(Box.createRigidArea(new Dimension(0, 2)));
+        panel.add(idHint);
+        panel.add(Box.createRigidArea(new Dimension(0, 14)));
+
+        panel.add(passLbl);
+        panel.add(Box.createRigidArea(new Dimension(0, 4)));
+        panel.add(stuPassField);
+        panel.add(Box.createRigidArea(new Dimension(0, 22)));
+
+        panel.add(stuLoginBtn);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(registerBtn);
+
+        return panel;
+    }
+
+    private JPanel createLibrarianForm() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(12, 0, 0, 0));
+
+        // Username
+        JLabel userLbl = new JLabel("Staff Username");
+        userLbl.setFont(UITheme.FONT_BODY_BOLD);
+        userLbl.setForeground(UITheme.TEXT_PRIMARY);
+        userLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        libUserField = UITheme.createTextField(15);
+        libUserField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        libUserField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Password
+        JLabel passLbl = new JLabel("Password");
+        passLbl.setFont(UITheme.FONT_BODY_BOLD);
+        passLbl.setForeground(UITheme.TEXT_PRIMARY);
+        passLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        libPassField = UITheme.createPasswordField(15);
+        libPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        libPassField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Login Action
+        JButton libLoginBtn = UITheme.createPrimaryButton("Sign In as Librarian");
+        libLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        libLoginBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        libLoginBtn.addActionListener(e -> attemptLibrarianLogin());
+
+        // Press Enter to login
+        libUserField.addActionListener(e -> attemptLibrarianLogin());
+        libPassField.addActionListener(e -> attemptLibrarianLogin());
+
+        panel.add(userLbl);
+        panel.add(Box.createRigidArea(new Dimension(0, 4)));
+        panel.add(libUserField);
+        panel.add(Box.createRigidArea(new Dimension(0, 16)));
+
+        panel.add(passLbl);
+        panel.add(Box.createRigidArea(new Dimension(0, 4)));
+        panel.add(libPassField);
+        panel.add(Box.createRigidArea(new Dimension(0, 26)));
+
+        panel.add(libLoginBtn);
+
+        return panel;
     }
     
     private void attemptLibrarianLogin() {
@@ -137,21 +300,24 @@ public class LoginPanel extends JPanel {
     }
     
     private void showStudentRegistrationForm() {
-        JTextField nameField = new JTextField(15);
-        JTextField ktuIdField = new JTextField(15);
+        JTextField nameField = UITheme.createTextField(15);
+        JTextField ktuIdField = UITheme.createTextField(15);
         
         String[] branches = {"CSE", "ECE", "AEI", "EEE", "EL", "CE", "ME", "IE"};
         JComboBox<String> branchBox = new JComboBox<>(branches);
+        UITheme.styleComboBox(branchBox);
         
         String[] semesters = {"1", "2", "3", "4", "5", "6", "7", "8"};
         JComboBox<String> semesterBox = new JComboBox<>(semesters);
+        UITheme.styleComboBox(semesterBox);
         
         String[] batches = {"2020-2024", "2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-2029", "2026-2030"};
         JComboBox<String> batchBox = new JComboBox<>(batches);
+        UITheme.styleComboBox(batchBox);
         batchBox.setSelectedItem("2023-2027");
         
-        JTextField emailField = new JTextField(15);
-        JTextField phoneField = new JTextField(15);
+        JTextField emailField = UITheme.createTextField(15);
+        JTextField phoneField = UITheme.createTextField(15);
         
         // If they already typed a valid KTU ID, pre-fill it and auto-select branch/batch
         String currentKtuId = stuIdField.getText().trim();
@@ -176,10 +342,12 @@ public class LoginPanel extends JPanel {
             }
         }
 
-        JPasswordField passField = new JPasswordField(15);
-        JPasswordField confirmPassField = new JPasswordField(15);
+        JPasswordField passField = UITheme.createPasswordField(15);
+        JPasswordField confirmPassField = UITheme.createPasswordField(15);
         
-        JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(0, 2, 12, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
         panel.add(new JLabel("Full Name:"));
         panel.add(nameField);
         panel.add(new JLabel("KTU ID:"));
@@ -200,7 +368,8 @@ public class LoginPanel extends JPanel {
         panel.add(passField);
         panel.add(new JLabel("Confirm Password:"));
         panel.add(confirmPassField);
-        int result = JOptionPane.showConfirmDialog(this, panel, "Student Registration", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Student Account Registration", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         
         if (result == JOptionPane.OK_OPTION) {
             String name = nameField.getText().trim();
@@ -235,6 +404,7 @@ public class LoginPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 stuIdField.setText(ktuId);
                 stuPassField.setText("");
+                switchRole(true);
             } catch (LibraryException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE);
             }

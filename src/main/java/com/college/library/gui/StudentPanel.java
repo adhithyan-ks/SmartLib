@@ -5,6 +5,7 @@ import com.college.library.model.Student;
 import com.college.library.service.StudentService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -15,17 +16,44 @@ public class StudentPanel extends JPanel {
     private DefaultTableModel tableModel;
     private JTable studentTable;
     private JButton toggleStatusBtn;
+    private JButton addBtn;
+    private JButton deleteBtn;
 
     public StudentPanel(MainApplication app, StudentService studentService) {
         this.app = app;
         this.studentService = studentService;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UITheme.BG_APP);
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton backBtn = new JButton("Back to Dashboard");
+        // 1. Top Header & Action Controls
+        JButton backBtn = UITheme.createBackButton("Dashboard");
         backBtn.addActionListener(e -> app.navigateTo("DASHBOARD"));
-        topPanel.add(backBtn);
-        add(topPanel, BorderLayout.NORTH);
+
+        addBtn = UITheme.createPrimaryButton("Add New Student");
+        toggleStatusBtn = UITheme.createWarningButton("Deactivate Student");
+        deleteBtn = UITheme.createDangerButton("Delete Student");
+
+        addBtn.addActionListener(e -> showAddDialog());
+        toggleStatusBtn.addActionListener(e -> toggleSelectedStudentStatus());
+        deleteBtn.addActionListener(e -> deleteSelectedStudent());
+
+        JPanel header = UITheme.createHeaderPanel(
+                "Student Directory & Records",
+                "Manage student accounts, registration, and circulation eligibility",
+                backBtn,
+                addBtn,
+                toggleStatusBtn,
+                deleteBtn
+        );
+        add(header, BorderLayout.NORTH);
+
+        // 2. Table Container Card
+        JPanel contentWrapper = new JPanel(new BorderLayout());
+        contentWrapper.setOpaque(false);
+        contentWrapper.setBorder(new EmptyBorder(18, 24, 20, 24));
+
+        UITheme.CardPanel tableCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        tableCard.setBorder(new EmptyBorder(12, 12, 12, 12));
 
         String[] columns = {"KTU ID", "Name", "Branch", "Semester", "Batch", "Email", "Phone", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -35,30 +63,35 @@ public class StudentPanel extends JPanel {
             }
         };
         studentTable = new JTable(tableModel);
+        UITheme.styleTable(studentTable);
+
+        // Proportional column sizing
+        studentTable.getColumnModel().getColumn(0).setPreferredWidth(110);
+        studentTable.getColumnModel().getColumn(1).setPreferredWidth(160);
+        studentTable.getColumnModel().getColumn(2).setPreferredWidth(70);
+        studentTable.getColumnModel().getColumn(3).setPreferredWidth(70);
+        studentTable.getColumnModel().getColumn(4).setPreferredWidth(90);
+        studentTable.getColumnModel().getColumn(5).setPreferredWidth(180);
+        studentTable.getColumnModel().getColumn(6).setPreferredWidth(110);
+        studentTable.getColumnModel().getColumn(7).setPreferredWidth(100);
+
         studentTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 updateToggleStatusButton();
             }
         });
-        add(new JScrollPane(studentTable), BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new FlowLayout());
-        JButton addBtn = new JButton("Add Student");
-        toggleStatusBtn = new JButton("Deactivate Student");
-        JButton deleteBtn = new JButton("Delete Student");
-        
-        addBtn.addActionListener(e -> showAddDialog());
-        toggleStatusBtn.addActionListener(e -> toggleSelectedStudentStatus());
-        deleteBtn.addActionListener(e -> deleteSelectedStudent());
-        
-        bottomPanel.add(addBtn);
-        bottomPanel.add(toggleStatusBtn);
-        bottomPanel.add(deleteBtn);
-        add(bottomPanel, BorderLayout.SOUTH);
-        
+        JScrollPane scrollPane = new JScrollPane(studentTable);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        scrollPane.getViewport().setBackground(UITheme.BG_CARD);
+
+        tableCard.add(scrollPane, BorderLayout.CENTER);
+        contentWrapper.add(tableCard, BorderLayout.CENTER);
+        add(contentWrapper, BorderLayout.CENTER);
+
         // Setup custom table selection behavior
         TableSelectionHelper.setupMutuallyExclusiveTables(studentTable);
-        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{studentTable}, deleteBtn, toggleStatusBtn);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{studentTable}, deleteBtn, toggleStatusBtn, addBtn);
     }
 
     public void refreshData() {
@@ -84,21 +117,24 @@ public class StudentPanel extends JPanel {
     }
 
     private void showAddDialog() {
-        JTextField idField = new JTextField();
-        JTextField nameField = new JTextField();
+        JTextField idField = UITheme.createTextField(15);
+        JTextField nameField = UITheme.createTextField(15);
         
         String[] branches = {"CSE", "ECE", "AEI", "EEE", "EL", "CE", "ME", "IE"};
         JComboBox<String> branchBox = new JComboBox<>(branches);
+        UITheme.styleComboBox(branchBox);
         
         String[] semesters = {"1", "2", "3", "4", "5", "6", "7", "8"};
         JComboBox<String> semBox = new JComboBox<>(semesters);
+        UITheme.styleComboBox(semBox);
         
         String[] batches = {"2020-2024", "2021-2025", "2022-2026", "2023-2027", "2024-2028", "2025-2029", "2026-2030"};
         JComboBox<String> batchBox = new JComboBox<>(batches);
+        UITheme.styleComboBox(batchBox);
         batchBox.setSelectedItem("2023-2027");
         
-        JTextField emailField = new JTextField();
-        JTextField phoneField = new JTextField();
+        JTextField emailField = UITheme.createTextField(15);
+        JTextField phoneField = UITheme.createTextField(15);
 
         // Auto-select batch and branch when valid KTU ID is typed
         Runnable updateAutoSelect = () -> {
@@ -129,17 +165,25 @@ public class StudentPanel extends JPanel {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { updateAutoSelect.run(); }
         });
         
-        Object[] message = {
-            "KTU ID:", idField,
-            "Name:", nameField,
-            "Branch:", branchBox,
-            "Semester:", semBox,
-            "Batch:", batchBox,
-            "Email:", emailField,
-            "Phone:", phoneField
-        };
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 12, 10));
+        formPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        formPanel.add(new JLabel("KTU ID:"));
+        formPanel.add(idField);
+        formPanel.add(new JLabel("Name:"));
+        formPanel.add(nameField);
+        formPanel.add(new JLabel("Branch:"));
+        formPanel.add(branchBox);
+        formPanel.add(new JLabel("Semester:"));
+        formPanel.add(semBox);
+        formPanel.add(new JLabel("Batch:"));
+        formPanel.add(batchBox);
+        formPanel.add(new JLabel("Email:"));
+        formPanel.add(emailField);
+        formPanel.add(new JLabel("Phone:"));
+        formPanel.add(phoneField);
         
-        int option = JOptionPane.showConfirmDialog(this, message, "Add New Student", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(this, formPanel, "Register New Student", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             String ktuId = idField.getText().trim();
             String name = nameField.getText().trim();
@@ -172,7 +216,7 @@ public class StudentPanel extends JPanel {
             
             try {
                 studentService.addStudent(s);
-                JOptionPane.showMessageDialog(this, "Student added successfully!");
+                JOptionPane.showMessageDialog(this, "Student added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshData();
             } catch (LibraryException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -223,7 +267,7 @@ public class StudentPanel extends JPanel {
     private void deleteSelectedStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a student to delete.");
+            JOptionPane.showMessageDialog(this, "Please select a student to delete.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
         

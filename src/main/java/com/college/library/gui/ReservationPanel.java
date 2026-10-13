@@ -2,10 +2,10 @@ package com.college.library.gui;
 
 import com.college.library.exception.LibraryException;
 import com.college.library.service.ReservationService;
-
 import com.college.library.service.BorrowService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class ReservationPanel extends JPanel {
@@ -17,46 +17,72 @@ public class ReservationPanel extends JPanel {
     private JTextField isbnField;
     private JTable reservationsTable;
     private javax.swing.table.DefaultTableModel tableModel;
+    private JButton fulfilBtn;
+    private JButton reserveBtn;
 
     public ReservationPanel(MainApplication app, ReservationService reservationService, BorrowService borrowService) {
         this.app = app;
         this.reservationService = reservationService;
         this.borrowService = borrowService;
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UITheme.BG_APP);
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton backBtn = new JButton("Back to Dashboard");
+        // 1. Top Header Navbar
+        JButton backBtn = UITheme.createBackButton("Dashboard");
         backBtn.addActionListener(e -> app.navigateTo("DASHBOARD"));
-        topPanel.add(backBtn);
-        add(topPanel, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(0, 20));
+        JPanel header = UITheme.createHeaderPanel(
+                "Reservation Desk",
+                "Place student book reservations and fulfil queued waitlists",
+                backBtn
+        );
+        add(header, BorderLayout.NORTH);
+
+        // 2. Main Content Container
+        JPanel mainContentPanel = new JPanel();
+        mainContentPanel.setLayout(new BoxLayout(mainContentPanel, BoxLayout.Y_AXIS));
+        mainContentPanel.setOpaque(false);
+        mainContentPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
         
-        // Form Panel
-        JPanel formWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 20, 15));
-        formPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder("Reserve Book"),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-        
-        formPanel.add(new JLabel("Student KTU ID:"));
-        studentIdField = new JTextField(15);
-        formPanel.add(studentIdField);
-        
-        formPanel.add(new JLabel("Book ISBN:"));
-        isbnField = new JTextField(15);
-        formPanel.add(isbnField);
-        
-        formPanel.add(new JLabel("")); // spacer
-        JButton reserveBtn = new JButton("Place Reservation");
+        // --- Form Card: Place Reservation ---
+        UITheme.CardPanel formCard = new UITheme.CardPanel(new BorderLayout(0, 12));
+        formCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+
+        JLabel formTitle = UITheme.createSectionHeader("Place New Reservation");
+        formCard.add(formTitle, BorderLayout.NORTH);
+
+        JPanel fieldsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
+        fieldsRow.setOpaque(false);
+
+        fieldsRow.add(new JLabel("Student KTU ID:"));
+        studentIdField = UITheme.createTextField(14);
+        fieldsRow.add(studentIdField);
+
+        fieldsRow.add(new JLabel("Book ISBN:"));
+        isbnField = UITheme.createTextField(14);
+        fieldsRow.add(isbnField);
+
+        reserveBtn = UITheme.createPrimaryButton("Place Reservation");
         reserveBtn.addActionListener(e -> attemptReserve());
-        formPanel.add(reserveBtn);
+        fieldsRow.add(reserveBtn);
+
+        formCard.add(fieldsRow, BorderLayout.CENTER);
+        mainContentPanel.add(formCard);
+        mainContentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // --- Table Card: Existing Reservations ---
+        UITheme.CardPanel tableCard = new UITheme.CardPanel(new BorderLayout(0, 12));
         
-        formWrapper.add(formPanel);
-        centerPanel.add(formWrapper, BorderLayout.NORTH);
-        
-        // Table Panel
+        JPanel tableHeaderPanel = new JPanel(new BorderLayout());
+        tableHeaderPanel.setOpaque(false);
+        JLabel tableTitle = UITheme.createSectionHeader("Active Reservations Queue");
+        tableHeaderPanel.add(tableTitle, BorderLayout.WEST);
+
+        fulfilBtn = UITheme.createSuccessButton("Fulfil Selected Reservation");
+        fulfilBtn.addActionListener(e -> attemptFulfil());
+        tableHeaderPanel.add(fulfilBtn, BorderLayout.EAST);
+        tableCard.add(tableHeaderPanel, BorderLayout.NORTH);
+
         String[] columns = {"Reservation ID", "Student KTU ID", "Student Name", "Book ISBN", "Book Title", "Request Date", "Queue Position", "Status"};
         tableModel = new javax.swing.table.DefaultTableModel(columns, 0) {
             @Override
@@ -65,24 +91,29 @@ public class ReservationPanel extends JPanel {
             }
         };
         reservationsTable = new JTable(tableModel);
-        
-        JPanel tablePanel = new JPanel(new BorderLayout());
-        tablePanel.setBorder(BorderFactory.createTitledBorder("Existing Reservations"));
-        tablePanel.add(new JScrollPane(reservationsTable), BorderLayout.CENTER);
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton fulfilBtn = new JButton("Fulfil Reservation");
-        fulfilBtn.addActionListener(e -> attemptFulfil());
-        buttonPanel.add(fulfilBtn);
-        tablePanel.add(buttonPanel, BorderLayout.SOUTH);
-        
-        centerPanel.add(tablePanel, BorderLayout.CENTER);
-        
-        add(centerPanel, BorderLayout.CENTER);
+        UITheme.styleTable(reservationsTable);
+
+        reservationsTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        reservationsTable.getColumnModel().getColumn(1).setPreferredWidth(120);
+        reservationsTable.getColumnModel().getColumn(2).setPreferredWidth(140);
+        reservationsTable.getColumnModel().getColumn(3).setPreferredWidth(120);
+        reservationsTable.getColumnModel().getColumn(4).setPreferredWidth(200);
+        reservationsTable.getColumnModel().getColumn(5).setPreferredWidth(140);
+        reservationsTable.getColumnModel().getColumn(6).setPreferredWidth(100);
+        reservationsTable.getColumnModel().getColumn(7).setPreferredWidth(100);
+
+        JScrollPane scrollPane = new JScrollPane(reservationsTable);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UITheme.BORDER));
+        scrollPane.getViewport().setBackground(UITheme.BG_CARD);
+
+        tableCard.add(scrollPane, BorderLayout.CENTER);
+        mainContentPanel.add(tableCard);
+
+        add(mainContentPanel, BorderLayout.CENTER);
         
         // Setup custom table selection behavior
         TableSelectionHelper.setupMutuallyExclusiveTables(reservationsTable);
-        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{reservationsTable}, fulfilBtn);
+        TableSelectionHelper.setupClickOutsideToClear(this, new JTable[]{reservationsTable}, fulfilBtn, reserveBtn);
     }
     
     public void refreshData() {
@@ -112,7 +143,7 @@ public class ReservationPanel extends JPanel {
     private void attemptFulfil() {
         int selectedRow = reservationsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a reservation to fulfil.");
+            JOptionPane.showMessageDialog(this, "Please select a reservation to fulfil.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
