@@ -17,7 +17,6 @@ public class DashboardPanel extends JPanel {
     private JLabel availableBooksVal;
     private JLabel issuedBooksVal;
     private JLabel totalStudentsVal;
-    private JLabel activeTxVal;
 
     public DashboardPanel(MainApplication app, AnalyticsService analyticsService) {
         this.app = app;
@@ -83,7 +82,7 @@ public class DashboardPanel extends JPanel {
         contentPanel.add(statsHeader);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 12)));
 
-        JPanel statsGrid = new JPanel(new GridLayout(1, 5, 12, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 4, 16, 0));
         statsGrid.setOpaque(false);
         statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
 
@@ -91,13 +90,11 @@ public class DashboardPanel extends JPanel {
         availableBooksVal = new JLabel("-");
         issuedBooksVal = new JLabel("-");
         totalStudentsVal = new JLabel("-");
-        activeTxVal = new JLabel("-");
 
         statsGrid.add(createStatCard("Total Books", totalBooksVal, UITheme.PRIMARY));
         statsGrid.add(createStatCard("Available Books", availableBooksVal, UITheme.SUCCESS));
         statsGrid.add(createStatCard("Issued Books", issuedBooksVal, UITheme.WARNING));
         statsGrid.add(createStatCard("Total Students", totalStudentsVal, new Color(99, 102, 241)));
-        statsGrid.add(createStatCard("Issued Books", activeTxVal, UITheme.INFO));
 
         contentPanel.add(statsGrid);
         contentPanel.add(Box.createVerticalGlue());
@@ -145,7 +142,6 @@ public class DashboardPanel extends JPanel {
             availableBooksVal.setText(String.valueOf(analyticsService.getAvailableBooks()));
             issuedBooksVal.setText(String.valueOf(analyticsService.getIssuedBooks()));
             totalStudentsVal.setText(String.valueOf(analyticsService.getTotalStudents()));
-            activeTxVal.setText(String.valueOf(analyticsService.getActiveTransactions()));
         } catch (LibraryException ex) {
             JOptionPane.showMessageDialog(this, "Failed to load analytics: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
