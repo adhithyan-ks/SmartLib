@@ -1309,13 +1309,13 @@ When `src/main/resources/sample_data.sql` is executed, it establishes the follow
    - `B1002` (ISBN: `978-0201633610`, *Design Patterns*, Category 1, Status: `AVAILABLE`)
    - `B1003` (ISBN: `978-0321125217`, *Domain-Driven Design*, Category 1, Status: `ISSUED`)
 4. **Students**:
-   - `TCR20CS001` (Alice Smith)
-   - `TCR20CS002` (Bob Jones)
-   - *(Note: Seed data students have `NULL` password hashes in `sample_data.sql`; see Schema Mismatches below).*
+   - `TVE23CS001` (Alice Smith)
+   - `TVE23CS002` (Bob Jones)
+   - *(Note: Seed data students have default password `password123` hashed using BCrypt).*
 5. **Circulation Transactions**:
-   - An active transaction linking student `TCR20CS001` with book `B1003` (issued `2023-10-01`, due `2023-10-15`, status `ACTIVE`).
+   - An active transaction linking student `TVE23CS001` with book `B1003` (issued `2023-10-01`, due `2023-10-15`, status `ACTIVE`).
 6. **Reservations**:
-   - A pending reservation for student `TCR20CS002` on ISBN `978-0321125217` (the issued book `B1003`).
+   - A pending reservation for student `TVE23CS002` on ISBN `978-0321125217` (the issued book `B1003`).
 
 ---
 
@@ -1361,13 +1361,9 @@ When inspecting actual source code against SQL scripts, five important discrepan
      ```java
      ktuId.matches("^TVE(22|23|24|25|26)[A-Z]{2}[0-9]{3}$")
      ```
-   - However, in `src/main/resources/sample_data.sql`, the sample students are inserted with `TCR` prefixes (`TCR20CS001`, `TCR20CS002`).
-   - **Impact**: The seed students from `sample_data.sql` cannot log in via the student portal UI because the GUI rejects any KTU ID not starting with `TVE` (years 22-26). To log in as a student, developers must use the registration form to create an account with a valid `TVE` ID (such as `TVE25CS064` or `TVE23CS001`).
-2. **Null Password Hashes in `sample_data.sql`**:
-   - `sample_data.sql` inserts student records without specifying `password_hash`.
-   - In `AuthService.loginStudent`, if `student.getPasswordHash() == null`, the system throws:
-     `"Account exists but not registered for login. Please register first."`
-   - **Impact**: Pre-existing student records must be registered via `showStudentRegistrationForm()` before they can log in.
+   - In `src/main/resources/sample_data.sql`, sample students are configured with valid TVE IDs (`TVE23CS001`, `TVE23CS002`) and pre-hashed passwords (`password123`), allowing immediate out-of-the-box login via the student portal.
+2. **Password Hashes in `sample_data.sql`**:
+   - `sample_data.sql` populates BCrypt password hashes for `TVE23CS001` and `TVE23CS002` (`password123`), enabling immediate test authentication without requiring prior manual registration.
 3. **`BorrowRequest.book_id` Column Width Mismatch**:
    - In `schema.sql`, `books.accession_id` is defined as `VARCHAR(20)`.
    - However, in table `borrow_requests`, `book_id` is declared as `VARCHAR(50)`.
@@ -2149,7 +2145,7 @@ Use this checklist to verify all application workflows manually:
 
 ### Verified System Limitations & Known Quirks
 
-1. **Student Login Regex Excludes Seed Data**: As noted earlier, `LoginPanel.java` strictly allows only `TVE22` through `TVE26` prefixes. The sample students inserted by `sample_data.sql` (`TCR20CS001`, `TCR20CS002`) cannot log in through the student login screen.
+1. **Seed Student Authentication**: The sample students inserted by `sample_data.sql` (`TVE23CS001`, `TVE23CS002`) use the default college prefix `TVE` (CSE branch) and have the default password `password123` pre-hashed for immediate testing.
 2. **Live Database Requirement in Test Suite**: `StudentAuthTest.java` connects directly to a live MySQL server. If MySQL is stopped, running `mvn test` will fail during build. A best practice improvement would be using an embedded H2 database or Testcontainers for automated testing.
 3. **Hardcoded Fallback Credentials in `DatabaseConnection`**: If `database.properties` is missing, `DatabaseConnection.java` falls back to `root` / `root`. If the developer's local MySQL password is not `root`, the application will fail silently to connect rather than prompting for credentials.
 4. **No Dedicated Clearance Module**: While clearance can be inferred from loan history, there is no formal certificate generation or clearance panel.
