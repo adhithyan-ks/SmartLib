@@ -60,21 +60,18 @@ public class StudentService {
 
         List<String> blockingReasons = new ArrayList<>();
 
-        // 1. Check borrow transactions (preserves borrowing history and checks active loans)
+        // 1. Check borrow transactions
         if (transactionDAO != null) {
             List<BorrowTransaction> transactions = transactionDAO.findByStudentId(ktuId);
             if (transactions != null && !transactions.isEmpty()) {
-                long activeCount = transactions.stream()
-                        .filter(t -> "ACTIVE".equalsIgnoreCase(t.getStatus()))
-                        .count();
-                long completedCount = transactions.size() - activeCount;
-
-                if (activeCount > 0 && completedCount > 0) {
-                    blockingReasons.add(activeCount + " active borrowed book(s) and " + completedCount + " borrowing history record(s)");
-                } else if (activeCount > 0) {
-                    blockingReasons.add(activeCount + " active borrowed book(s)");
+                long active = transactions.stream().filter(t -> "ACTIVE".equalsIgnoreCase(t.getStatus())).count();
+                long completed = transactions.size() - active;
+                if (active > 0 && completed > 0) {
+                    blockingReasons.add(active + " active borrowed book(s) and " + completed + " borrowing history record(s)");
+                } else if (active > 0) {
+                    blockingReasons.add(active + " active borrowed book(s)");
                 } else {
-                    blockingReasons.add(completedCount + " borrowing history record(s)");
+                    blockingReasons.add(completed + " borrowing history record(s)");
                 }
             }
         }
@@ -83,15 +80,12 @@ public class StudentService {
         if (borrowRequestDAO != null) {
             List<BorrowRequest> requests = borrowRequestDAO.findByStudentId(ktuId);
             if (requests != null && !requests.isEmpty()) {
-                long pendingCount = requests.stream()
-                        .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()))
-                        .count();
-                long pastCount = requests.size() - pendingCount;
-
-                if (pendingCount > 0 && pastCount > 0) {
-                    blockingReasons.add(pendingCount + " pending borrow request(s) and " + pastCount + " past request(s)");
-                } else if (pendingCount > 0) {
-                    blockingReasons.add(pendingCount + " pending borrow request(s)");
+                long pending = requests.stream().filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())).count();
+                long past = requests.size() - pending;
+                if (pending > 0 && past > 0) {
+                    blockingReasons.add(pending + " pending borrow request(s) and " + past + " past request(s)");
+                } else if (pending > 0) {
+                    blockingReasons.add(pending + " pending borrow request(s)");
                 } else {
                     blockingReasons.add(requests.size() + " borrow request(s)");
                 }
@@ -102,15 +96,12 @@ public class StudentService {
         if (reservationDAO != null) {
             List<Reservation> reservations = reservationDAO.findByStudentId(ktuId);
             if (reservations != null && !reservations.isEmpty()) {
-                long pendingCount = reservations.stream()
-                        .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()))
-                        .count();
-                long pastCount = reservations.size() - pendingCount;
-
-                if (pendingCount > 0 && pastCount > 0) {
-                    blockingReasons.add(pendingCount + " pending reservation(s) and " + pastCount + " past reservation(s)");
-                } else if (pendingCount > 0) {
-                    blockingReasons.add(pendingCount + " pending reservation(s)");
+                long pending = reservations.stream().filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())).count();
+                long past = reservations.size() - pending;
+                if (pending > 0 && past > 0) {
+                    blockingReasons.add(pending + " pending reservation(s) and " + past + " past reservation(s)");
+                } else if (pending > 0) {
+                    blockingReasons.add(pending + " pending reservation(s)");
                 } else {
                     blockingReasons.add(reservations.size() + " reservation(s)");
                 }

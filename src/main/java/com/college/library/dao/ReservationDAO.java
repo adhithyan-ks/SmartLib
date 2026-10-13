@@ -5,6 +5,7 @@ import com.college.library.model.Reservation;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,6 @@ public interface ReservationDAO extends CrudDAO<Reservation, Integer> {
     List<Reservation> findPendingByStudentId(String studentId) throws LibraryException;
     List<Reservation> findPendingByIsbn(String isbn) throws LibraryException;
     default List<Reservation> findByStudentId(String studentId) throws LibraryException {
-        return java.util.Collections.emptyList();
+        return Collections.emptyList();
     }
 }

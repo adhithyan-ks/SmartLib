@@ -75,14 +75,15 @@ public class UITheme {
     private static final String FONT_NAME = getPreferredFontFamily();
     public static final Font FONT_HERO = new Font(FONT_NAME, Font.BOLD, 22);
     public static final Font FONT_TITLE = new Font(FONT_NAME, Font.BOLD, 17);
-    public static final Font FONT_SUBTITLE = new Font(FONT_NAME, Font.PLAIN, 13);
+    public static final Font FONT_SUBTITLE = new Font(FONT_NAME, Font.PLAIN, 12);
     public static final Font FONT_SECTION = new Font(FONT_NAME, Font.BOLD, 14);
     public static final Font FONT_BODY = new Font(FONT_NAME, Font.PLAIN, 13);
     public static final Font FONT_BODY_BOLD = new Font(FONT_NAME, Font.BOLD, 13);
+    public static final Font FONT_BUTTON = new Font(FONT_NAME, Font.BOLD, 12);
     public static final Font FONT_SMALL = new Font(FONT_NAME, Font.PLAIN, 12);
     public static final Font FONT_BADGE = new Font(FONT_NAME, Font.BOLD, 11);
-    public static final Font FONT_STAT_NUM = new Font(FONT_NAME, Font.BOLD, 26);
-    public static final Font FONT_STAT_LBL = new Font(FONT_NAME, Font.BOLD, 12);
+    public static final Font FONT_STAT_NUM = new Font(FONT_NAME, Font.BOLD, 24);
+    public static final Font FONT_STAT_LBL = new Font(FONT_NAME, Font.BOLD, 11);
 
     private static String getPreferredFontFamily() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -117,7 +118,7 @@ public class UITheme {
         UIManager.put("PasswordField.foreground", TEXT_PRIMARY);
         UIManager.put("ComboBox.font", FONT_BODY);
         UIManager.put("ComboBox.foreground", TEXT_PRIMARY);
-        UIManager.put("Button.font", FONT_BODY_BOLD);
+        UIManager.put("Button.font", FONT_BUTTON);
         UIManager.put("Table.font", FONT_BODY);
         UIManager.put("TableHeader.font", FONT_BODY_BOLD);
         UIManager.put("TableHeader.background", BG_TABLE_HEADER);
@@ -140,18 +141,18 @@ public class UITheme {
         private final ButtonType type;
         private boolean isHovered = false;
         private boolean isPressed = false;
-        private int cornerRadius = 8;
+        private int cornerRadius = 6;
 
         public ModernButton(String text, ButtonType type) {
             super(text);
             this.type = type;
-            setFont(FONT_BODY_BOLD);
+            setFont(FONT_BUTTON);
             setFocusPainted(false);
             setContentAreaFilled(false);
             setBorderPainted(false);
             setOpaque(false);
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            setMargin(new Insets(8, 16, 8, 16));
+            setMargin(new Insets(4, 12, 4, 12));
 
             addMouseListener(new MouseAdapter() {
                 @Override
@@ -193,7 +194,7 @@ public class UITheme {
         @Override
         public Dimension getPreferredSize() {
             Dimension d = super.getPreferredSize();
-            return new Dimension(Math.max(d.width + 24, 88), Math.max(d.height + 10, 36));
+            return new Dimension(Math.max(d.width + 12, 68), Math.max(d.height + 4, 30));
         }
 
         @Override
@@ -291,7 +292,7 @@ public class UITheme {
     public static JButton createBackButton(String text) {
         String label = text.startsWith("<") || text.startsWith("←") ? text : "←  " + text;
         ModernButton btn = new ModernButton(label, ButtonType.SECONDARY);
-        btn.setFont(FONT_BODY_BOLD);
+        btn.setFont(FONT_BUTTON);
         return btn;
     }
 
@@ -314,15 +315,15 @@ public class UITheme {
         field.setForeground(TEXT_PRIMARY);
         field.setBackground(BG_INPUT);
         field.setCaretColor(PRIMARY);
-        field.setPreferredSize(new Dimension(field.getPreferredSize().width, 36));
+        field.setPreferredSize(new Dimension(field.getPreferredSize().width, 32));
 
         Border normalBorder = new CompoundBorder(
                 new RoundedBorder(BORDER, 6, 1),
-                new EmptyBorder(6, 12, 6, 12)
+                new EmptyBorder(5, 10, 5, 10)
         );
         Border focusBorder = new CompoundBorder(
                 new RoundedBorder(BORDER_FOCUS, 6, 1.5f),
-                new EmptyBorder(6, 12, 6, 12)
+                new EmptyBorder(5, 10, 5, 10)
         );
 
         field.setBorder(normalBorder);
@@ -345,7 +346,7 @@ public class UITheme {
         box.setFont(FONT_BODY);
         box.setForeground(TEXT_PRIMARY);
         box.setBackground(BG_CARD);
-        box.setPreferredSize(new Dimension(box.getPreferredSize().width, 36));
+        box.setPreferredSize(new Dimension(box.getPreferredSize().width, 32));
         box.setBorder(new CompoundBorder(
                 new RoundedBorder(BORDER, 6, 1),
                 new EmptyBorder(4, 8, 4, 8)
@@ -420,47 +421,59 @@ public class UITheme {
 
     /**
      * Creates a standardized, professional header panel with back navigation and title.
+     * Prevents title/subtitle text from overlapping action buttons at any window size.
      */
     public static JPanel createHeaderPanel(String title, String subtitle, JButton backBtn, JComponent... rightComponents) {
-        JPanel header = new JPanel(new BorderLayout(16, 0));
+        JPanel header = new JPanel(new BorderLayout(14, 0));
         header.setBackground(BG_HEADER);
         header.setBorder(new CompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
-                new EmptyBorder(14, 24, 14, 24)
+                new EmptyBorder(12, 20, 12, 20)
         ));
 
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
-        leftPanel.setOpaque(false);
-
         if (backBtn != null) {
-            leftPanel.add(backBtn);
+            JPanel westWrapper = new JPanel(new GridBagLayout());
+            westWrapper.setOpaque(false);
+            westWrapper.add(backBtn);
+            header.add(westWrapper, BorderLayout.WEST);
         }
 
-        JPanel titleBlock = new JPanel(new GridLayout(subtitle != null ? 2 : 1, 1, 0, 2));
+        JPanel titleBlock = new JPanel(new GridBagLayout());
         titleBlock.setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel titleLbl = new JLabel(title);
         titleLbl.setFont(FONT_TITLE);
         titleLbl.setForeground(TEXT_PRIMARY);
-        titleBlock.add(titleLbl);
+        titleBlock.add(titleLbl, gbc);
 
-        if (subtitle != null) {
+        if (subtitle != null && !subtitle.trim().isEmpty()) {
+            gbc.gridy = 1;
+            gbc.insets = new Insets(2, 0, 0, 0);
             JLabel subLbl = new JLabel(subtitle);
             subLbl.setFont(FONT_SUBTITLE);
             subLbl.setForeground(TEXT_SECONDARY);
-            titleBlock.add(subLbl);
+            titleBlock.add(subLbl, gbc);
         }
 
-        leftPanel.add(titleBlock);
-        header.add(leftPanel, BorderLayout.WEST);
+        header.add(titleBlock, BorderLayout.CENTER);
 
         if (rightComponents != null && rightComponents.length > 0) {
-            JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+            JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
             rightPanel.setOpaque(false);
             for (JComponent c : rightComponents) {
                 if (c != null) rightPanel.add(c);
             }
-            header.add(rightPanel, BorderLayout.EAST);
+            JPanel eastWrapper = new JPanel(new GridBagLayout());
+            eastWrapper.setOpaque(false);
+            eastWrapper.add(rightPanel);
+            header.add(eastWrapper, BorderLayout.EAST);
         }
 
         return header;

@@ -40,6 +40,7 @@ public class DashboardPanel extends JPanel {
                 "Librarian Dashboard",
                 "College Library Administration & Circulation",
                 null,
+                userGreetingLbl,
                 logoutBtn
         );
         add(header, BorderLayout.NORTH);
@@ -57,7 +58,7 @@ public class DashboardPanel extends JPanel {
 
         JPanel navGrid = new JPanel(new GridLayout(1, 4, 16, 0));
         navGrid.setOpaque(false);
-        navGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+        navGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
 
         JButton booksBtn = UITheme.createPrimaryButton("Manage Books");
         JButton studentsBtn = UITheme.createPrimaryButton("Manage Students");
@@ -82,9 +83,9 @@ public class DashboardPanel extends JPanel {
         contentPanel.add(statsHeader);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 12)));
 
-        JPanel statsGrid = new JPanel(new GridLayout(1, 5, 14, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 5, 12, 0));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
 
         totalBooksVal = new JLabel("-");
         availableBooksVal = new JLabel("-");
@@ -96,7 +97,7 @@ public class DashboardPanel extends JPanel {
         statsGrid.add(createStatCard("Available Books", availableBooksVal, UITheme.SUCCESS));
         statsGrid.add(createStatCard("Issued Books", issuedBooksVal, UITheme.WARNING));
         statsGrid.add(createStatCard("Total Students", totalStudentsVal, new Color(99, 102, 241)));
-        statsGrid.add(createStatCard("Active Loans", activeTxVal, UITheme.INFO));
+        statsGrid.add(createStatCard("Issued Books", activeTxVal, UITheme.INFO));
 
         contentPanel.add(statsGrid);
         contentPanel.add(Box.createVerticalGlue());
@@ -106,8 +107,8 @@ public class DashboardPanel extends JPanel {
 
     private JPanel createStatCard(String title, JLabel valueLabel, Color accentColor) {
         UITheme.CardPanel card = new UITheme.CardPanel(new BorderLayout(0, 8));
-        card.setCornerRadius(10);
-        card.setBorder(new EmptyBorder(16, 18, 16, 18));
+        card.setCornerRadius(8);
+        card.setBorder(new EmptyBorder(12, 14, 12, 14));
 
         JLabel titleLbl = new JLabel(title.toUpperCase());
         titleLbl.setFont(UITheme.FONT_STAT_LBL);

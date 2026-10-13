@@ -29,7 +29,7 @@ public class BookPanel extends JPanel {
         backBtn.addActionListener(e -> app.navigateTo("DASHBOARD"));
 
         addBtn = UITheme.createPrimaryButton("Add New Book");
-        deleteBtn = UITheme.createDangerButton("Delete Selected Book");
+        deleteBtn = UITheme.createDangerButton("Delete Book");
 
         addBtn.addActionListener(e -> showAddDialog());
         deleteBtn.addActionListener(e -> deleteSelectedBook());

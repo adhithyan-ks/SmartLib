@@ -1,46 +1,49 @@
 package com.college.library.service;
 
+import com.college.library.dao.BookDAO;
 import com.college.library.dao.ReservationDAO;
 import com.college.library.dao.StudentDAO;
 import com.college.library.exception.LibraryException;
+import com.college.library.model.Book;
 import com.college.library.model.Reservation;
+import com.college.library.model.Student;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationService {
     private final ReservationDAO reservationDAO;
     private final StudentDAO studentDAO;
-    private final com.college.library.dao.BookDAO bookDAO;
+    private final BookDAO bookDAO;
 
-    public ReservationService(ReservationDAO reservationDAO, StudentDAO studentDAO, com.college.library.dao.BookDAO bookDAO) {
+    public ReservationService(ReservationDAO reservationDAO, StudentDAO studentDAO, BookDAO bookDAO) {
         this.reservationDAO = reservationDAO;
         this.studentDAO = studentDAO;
         this.bookDAO = bookDAO;
     }
 
     public String addReservation(String studentId, String bookIsbn) throws LibraryException {
-        com.college.library.model.Student student = studentDAO.findById(studentId)
+        Student student = studentDAO.findById(studentId)
             .orElseThrow(() -> new LibraryException("Student not found."));
         if (!student.isActive()) {
             throw new LibraryException("Cannot place reservation: Student account is inactive.");
         }
             
-        java.util.List<com.college.library.model.Book> books = bookDAO.findByIsbn(bookIsbn);
+        List<Book> books = bookDAO.findByIsbn(bookIsbn);
         if (books.isEmpty()) {
             throw new LibraryException("No books found with ISBN: " + bookIsbn);
         }
         
-        for (com.college.library.model.Book b : books) {
-            if ("AVAILABLE".equals(b.getStatus())) {
-                throw new LibraryException("This book is available. Please contact the librarian to borrow it directly.");
-            }
+        boolean hasAvailable = books.stream().anyMatch(b -> "AVAILABLE".equals(b.getStatus()));
+        if (hasAvailable) {
+            throw new LibraryException("This book is available. Please contact the librarian to borrow it directly.");
         }
         
-        java.util.List<Reservation> pending = reservationDAO.findPendingByIsbn(bookIsbn);
-        for (Reservation r : pending) {
-            if (r.getStudentId().equals(studentId)) {
-                throw new LibraryException("Student already has an active reservation for this book.");
-            }
+        List<Reservation> pending = reservationDAO.findPendingByIsbn(bookIsbn);
+        boolean alreadyReserved = pending.stream().anyMatch(r -> r.getStudentId().equals(studentId));
+        if (alreadyReserved) {
+            throw new LibraryException("Student already has an active reservation for this book.");
         }
         
         Reservation res = new Reservation();
@@ -66,26 +69,21 @@ public class ReservationService {
         reservationDAO.update(res);
     }
     
-    public java.util.List<Object[]> getAllReservationsWithDetails() throws LibraryException {
-        java.util.List<Object[]> result = new java.util.ArrayList<>();
-        java.util.List<Reservation> allReservations = reservationDAO.findAll();
+    public List<Object[]> getAllReservationsWithDetails() throws LibraryException {
+        List<Object[]> result = new ArrayList<>();
+        List<Reservation> allReservations = reservationDAO.findAll();
         
         for (Reservation r : allReservations) {
-            String studentName = "Unknown";
-            com.college.library.model.Student s = studentDAO.findById(r.getStudentId()).orElse(null);
-            if (s != null) {
-                studentName = s.getName();
-            }
+            String studentName = studentDAO.findById(r.getStudentId())
+                    .map(Student::getName)
+                    .orElse("Unknown");
             
-            String bookTitle = "Unknown";
-            java.util.List<com.college.library.model.Book> books = bookDAO.findByIsbn(r.getBookIsbn());
-            if (!books.isEmpty()) {
-                bookTitle = books.get(0).getTitle();
-            }
+            List<Book> books = bookDAO.findByIsbn(r.getBookIsbn());
+            String bookTitle = !books.isEmpty() ? books.get(0).getTitle() : "Unknown";
             
             String queuePosition = "-";
             if ("PENDING".equals(r.getStatus())) {
-                java.util.List<Reservation> pending = reservationDAO.findPendingByIsbn(r.getBookIsbn());
+                List<Reservation> pending = reservationDAO.findPendingByIsbn(r.getBookIsbn());
                 for (int i = 0; i < pending.size(); i++) {
                     if (pending.get(i).getId() == r.getId()) {
                         queuePosition = String.valueOf(i + 1);
@@ -111,10 +109,9 @@ public class ReservationService {
         return result;
     }
     
-    public java.util.List<Object[]> getStudentReservationsWithDetails(String studentId) throws LibraryException {
-        java.util.List<Object[]> result = new java.util.ArrayList<>();
-        java.util.List<Object[]> all = getAllReservationsWithDetails();
-        for (Object[] row : all) {
+    public List<Object[]> getStudentReservationsWithDetails(String studentId) throws LibraryException {
+        List<Object[]> result = new ArrayList<>();
+        for (Object[] row : getAllReservationsWithDetails()) {
             if (studentId.equals(row[1])) {
                 result.add(row);
             }

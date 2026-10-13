@@ -100,11 +100,11 @@ public class LoginPanel extends JPanel {
     }
 
     private void styleSegmentedButton(JButton btn, boolean active) {
-        btn.setFont(UITheme.FONT_BODY_BOLD);
+        btn.setFont(UITheme.FONT_BUTTON);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 32));
+        btn.setPreferredSize(new Dimension(btn.getPreferredSize().width, 30));
         if (active) {
             btn.setBackground(UITheme.BG_CARD);
             btn.setForeground(UITheme.PRIMARY);
@@ -135,7 +135,7 @@ public class LoginPanel extends JPanel {
         idLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         stuIdField = UITheme.createTextField(15);
-        stuIdField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        stuIdField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         stuIdField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel idHint = new JLabel("Format: TVE23CS001");
@@ -150,12 +150,12 @@ public class LoginPanel extends JPanel {
         passLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         stuPassField = UITheme.createPasswordField(15);
-        stuPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        stuPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         stuPassField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Login Action
         JButton stuLoginBtn = UITheme.createPrimaryButton("Sign In as Student");
-        stuLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        stuLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         stuLoginBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         stuLoginBtn.addActionListener(e -> attemptStudentLogin());
 
@@ -165,7 +165,7 @@ public class LoginPanel extends JPanel {
 
         // Register Action
         JButton registerBtn = UITheme.createSecondaryButton("New Student? Create Account");
-        registerBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        registerBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         registerBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         registerBtn.addActionListener(e -> showStudentRegistrationForm());
 
@@ -201,7 +201,7 @@ public class LoginPanel extends JPanel {
         userLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         libUserField = UITheme.createTextField(15);
-        libUserField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        libUserField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         libUserField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Password
@@ -211,12 +211,12 @@ public class LoginPanel extends JPanel {
         passLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         libPassField = UITheme.createPasswordField(15);
-        libPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        libPassField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         libPassField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Login Action
         JButton libLoginBtn = UITheme.createPrimaryButton("Sign In as Librarian");
-        libLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        libLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         libLoginBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         libLoginBtn.addActionListener(e -> attemptLibrarianLogin());
 

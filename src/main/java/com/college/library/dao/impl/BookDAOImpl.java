@@ -3,6 +3,7 @@ package com.college.library.dao.impl;
 import com.college.library.dao.BookDAO;
 import com.college.library.exception.LibraryException;
 import com.college.library.model.Book;
+import com.college.library.model.Category;
 import com.college.library.util.DatabaseConnection;
 
 import java.sql.*;
@@ -124,15 +125,15 @@ public class BookDAOImpl implements BookDAO {
     }
     
     @Override
-    public List<com.college.library.model.Category> getAllCategories() throws LibraryException {
-        List<com.college.library.model.Category> categories = new ArrayList<>();
+    public List<Category> getAllCategories() throws LibraryException {
+        List<Category> categories = new ArrayList<>();
         String sql = "SELECT * FROM categories";
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
             while (rs.next()) {
-                categories.add(new com.college.library.model.Category(
+                categories.add(new Category(
                     rs.getInt("id"),
                     rs.getString("name")
                 ));

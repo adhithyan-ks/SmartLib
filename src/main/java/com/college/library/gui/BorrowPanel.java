@@ -51,7 +51,7 @@ public class BorrowPanel extends JPanel {
         // --- Forms Section (Issue & Return Cards) ---
         JPanel formsPanel = new JPanel(new GridLayout(1, 2, 20, 0));
         formsPanel.setOpaque(false);
-        formsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
+        formsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 165));
         
         // Manual Issue Card
         UITheme.CardPanel issueCard = new UITheme.CardPanel(new BorderLayout(0, 12));
@@ -109,7 +109,7 @@ public class BorrowPanel extends JPanel {
         JLabel reqTitle = UITheme.createSectionHeader("Pending Student Borrow Requests");
         reqHeaderPanel.add(reqTitle, BorderLayout.WEST);
 
-        JPanel reqActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JPanel reqActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         reqActionsPanel.setOpaque(false);
         approveBtn = UITheme.createSuccessButton("Approve Request");
         approveBtn.addActionListener(e -> approveRequest());

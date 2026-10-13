@@ -116,7 +116,7 @@
 
 The application bridges two distinct operational workflows through a single graphical user interface:
 1. **Administrative Librarian Portal**: Enables library staff to manage the physical book catalog, enroll students, issue and return books manually, compute overdue fines, manage reservations, approve/reject digital borrowing requests, and view real-time inventory statistics.
-2. **Student Self-Service Portal**: Allows enrolled college students (identified by their university KTU ID) to authenticate securely, browse and search available book titles grouped by ISBN, view available copy counts, submit digital borrow requests, track active loans and past borrowing history, and monitor waitlist reservations in real time.
+2. **Student Self-Service Portal**: Allows enrolled college students (identified by their university KTU ID) to authenticate securely, browse and search available book titles grouped by ISBN, view available copy counts, submit digital borrow requests, track issued books and past borrowing history, and monitor waitlist reservations in real time.
 
 ### Target Users and Real-World Problems Solved
 
@@ -537,7 +537,7 @@ SmartLib/
 
 - **`StudentDashboardPanel.java`**
   - **Relative Path**: `src/main/java/com/college/library/gui/StudentDashboardPanel.java`
-  - **Contents**: Comprehensive 4-quadrant student self-service portal: (1) Book Search & Availability with "Request to Borrow", (2) My Borrow Requests, (3) Borrowing History & Active Loans, and (4) My Reservations.
+  - **Contents**: Comprehensive 4-quadrant student self-service portal: (1) Book Search & Availability with "Request to Borrow", (2) My Borrow Requests, (3) Borrowing History & Issued Books, and (4) My Reservations.
   - **Why It Exists**: Delivers a full-featured self-service portal for college students.
   - **Used By**: `MainApplication`.
   - **When to Edit**: When extending student capabilities (e.g., student-initiated reservation cancellation).
@@ -1576,7 +1576,7 @@ try (Connection conn = DatabaseConnection.getConnection()) {
 5. **BCrypt Verification**: `AuthService` extracts the stored `password_hash` and checks it with `BCrypt.checkpw("password123", hash)`.
 6. **Session Storage**: On match, `MainApplication.setLoggedInUser(librarian)` stores the authenticated staff entity in session memory; student session is cleared (`setLoggedInStudent(null)`).
 7. **View Transition**: Calls `app.navigateTo("DASHBOARD")`.
-8. **Dashboard Refresh**: `DashboardPanel.refreshData()` queries `AnalyticsService` and updates counters for total books, available books, issued books, and active loans.
+8. **Dashboard Refresh**: `DashboardPanel.refreshData()` queries `AnalyticsService` and updates counters for total books, available books, issued books, and active transactions.
 
 ---
 
@@ -1778,7 +1778,7 @@ public void navigateTo(String viewName) {
    - Layout: $2 \times 2$ grid of panels:
      - Top-Left: Book Search & Availability with keyword filter and "Request to Borrow".
      - Top-Right: My Borrow Requests table.
-     - Bottom-Left: My Borrowing History & Active Loans table.
+     - Bottom-Left: My Borrowing History & Issued Books table.
      - Bottom-Right: My Reservations table.
 
 ---
@@ -2086,7 +2086,7 @@ private static final int MAX_BORROW_DAYS = 14;
 2. **Create GUI Panel** (`src/main/java/com/college/library/gui/ClearancePanel.java`):
    - Input field for Student KTU ID.
    - Button "Verify Clearance".
-   - Result display showing status: `"CLEARED (No Outstanding Loans or Dues)"` or `"BLOCKED (Active Loans: X, Unpaid Fines: Rs. Y)"`.
+   - Result display showing status: `"CLEARED (No Outstanding Dues or Issued Books)"` or `"BLOCKED (Issued Books: X, Unpaid Fines: Rs. Y)"`.
 3. **Register in Main Router** (`MainApplication.java`):
    - Instantiate `clearancePanel = new ClearancePanel(this, borrowService);`
    - Add to card layout: `mainPanel.add(clearancePanel, "CLEARANCE");`

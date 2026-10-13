@@ -15,10 +15,9 @@ public class StudentDAOImpl implements StudentDAO {
     @Override
     public void create(Student student) throws LibraryException {
         String status = student.getStatus() != null ? student.getStatus() : "ACTIVE";
-        String sqlWithStatus = "INSERT INTO students (ktu_id, password_hash, name, branch, semester, batch, email, phone, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO students (ktu_id, password_hash, name, branch, semester, batch, email, phone, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sqlWithStatus)) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, student.getKtuId());
             pstmt.setString(2, student.getPasswordHash());
             pstmt.setString(3, student.getName());
@@ -28,28 +27,8 @@ public class StudentDAOImpl implements StudentDAO {
             pstmt.setString(7, student.getEmail());
             pstmt.setString(8, student.getPhone());
             pstmt.setString(9, status);
-            
             pstmt.executeUpdate();
-            return;
         } catch (SQLException e) {
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("status")) {
-                String sqlWithout = "INSERT INTO students (ktu_id, password_hash, name, branch, semester, batch, email, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                try (Connection conn = DatabaseConnection.getConnection();
-                     PreparedStatement pstmt = conn.prepareStatement(sqlWithout)) {
-                    pstmt.setString(1, student.getKtuId());
-                    pstmt.setString(2, student.getPasswordHash());
-                    pstmt.setString(3, student.getName());
-                    pstmt.setString(4, student.getBranch());
-                    pstmt.setInt(5, student.getSemester());
-                    pstmt.setString(6, student.getBatch());
-                    pstmt.setString(7, student.getEmail());
-                    pstmt.setString(8, student.getPhone());
-                    pstmt.executeUpdate();
-                    return;
-                } catch (SQLException ex) {
-                    throw new LibraryException("Error creating student: " + ex.getMessage(), ex);
-                }
-            }
             throw new LibraryException("Error creating student: " + e.getMessage(), e);
         }
     }
@@ -195,12 +174,9 @@ public class StudentDAOImpl implements StudentDAO {
                      "(SELECT COUNT(*) FROM reservations WHERE student_id = ? AND status = 'PENDING') AS pending_res";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, ktuId);
-            pstmt.setString(2, ktuId);
-            pstmt.setString(3, ktuId);
-            pstmt.setString(4, ktuId);
-            pstmt.setString(5, ktuId);
-            pstmt.setString(6, ktuId);
+            for (int i = 1; i <= 6; i++) {
+                pstmt.setString(i, ktuId);
+            }
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int totalTx = rs.getInt("total_tx");

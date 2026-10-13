@@ -6,7 +6,9 @@ import com.college.library.service.BorrowService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class ReservationPanel extends JPanel {
     private MainApplication app;
@@ -16,7 +18,7 @@ public class ReservationPanel extends JPanel {
     private JTextField studentIdField;
     private JTextField isbnField;
     private JTable reservationsTable;
-    private javax.swing.table.DefaultTableModel tableModel;
+    private DefaultTableModel tableModel;
     private JButton fulfilBtn;
     private JButton reserveBtn;
 
@@ -45,21 +47,21 @@ public class ReservationPanel extends JPanel {
         mainContentPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
         
         // --- Form Card: Place Reservation ---
-        UITheme.CardPanel formCard = new UITheme.CardPanel(new BorderLayout(0, 12));
-        formCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+        UITheme.CardPanel formCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        formCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
 
         JLabel formTitle = UITheme.createSectionHeader("Place New Reservation");
         formCard.add(formTitle, BorderLayout.NORTH);
 
-        JPanel fieldsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
+        JPanel fieldsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 14, 0));
         fieldsRow.setOpaque(false);
 
         fieldsRow.add(new JLabel("Student KTU ID:"));
-        studentIdField = UITheme.createTextField(14);
+        studentIdField = UITheme.createTextField(12);
         fieldsRow.add(studentIdField);
 
         fieldsRow.add(new JLabel("Book ISBN:"));
-        isbnField = UITheme.createTextField(14);
+        isbnField = UITheme.createTextField(12);
         fieldsRow.add(isbnField);
 
         reserveBtn = UITheme.createPrimaryButton("Place Reservation");
@@ -84,7 +86,7 @@ public class ReservationPanel extends JPanel {
         tableCard.add(tableHeaderPanel, BorderLayout.NORTH);
 
         String[] columns = {"Reservation ID", "Student KTU ID", "Student Name", "Book ISBN", "Book Title", "Request Date", "Queue Position", "Status"};
-        tableModel = new javax.swing.table.DefaultTableModel(columns, 0) {
+        tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -121,7 +123,7 @@ public class ReservationPanel extends JPanel {
         isbnField.setText("");
         tableModel.setRowCount(0);
         try {
-            java.util.List<Object[]> rows = reservationService.getAllReservationsWithDetails();
+            List<Object[]> rows = reservationService.getAllReservationsWithDetails();
             for (Object[] row : rows) {
                 tableModel.addRow(row);
             }

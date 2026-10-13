@@ -55,8 +55,9 @@ public class StudentDashboardPanel extends JPanel {
 
         JPanel header = UITheme.createHeaderPanel(
                 "Student Portal",
-                "Search books, track loans, view requests, and check reservations",
+                "Search books, track issued books, view requests, and check reservations",
                 null,
+                studentGreetingLbl,
                 logoutBtn
         );
         add(header, BorderLayout.NORTH);
@@ -67,18 +68,24 @@ public class StudentDashboardPanel extends JPanel {
         centerGrid.setBorder(new EmptyBorder(16, 20, 16, 20));
 
         // --- Card 1: Search & Request to Borrow ---
-        UITheme.CardPanel searchCard = new UITheme.CardPanel(new BorderLayout(0, 10));
+        UITheme.CardPanel searchCard = new UITheme.CardPanel(new BorderLayout(0, 8));
         searchCard.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-        JPanel searchHeader = new JPanel(new BorderLayout(8, 0));
-        searchHeader.setOpaque(false);
-        JLabel searchTitle = UITheme.createSectionHeader("Book Search & Availability");
-        searchHeader.add(searchTitle, BorderLayout.WEST);
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setOpaque(false);
 
-        JPanel searchControls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        JLabel searchTitle = UITheme.createSectionHeader("Book Search & Availability");
+        searchTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        topPanel.add(searchTitle);
+        topPanel.add(Box.createRigidArea(new Dimension(0, 6)));
+
+        JPanel searchControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         searchControls.setOpaque(false);
+        searchControls.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         searchField = UITheme.createTextField(10);
-        searchField.setPreferredSize(new Dimension(130, 32));
+        searchField.setPreferredSize(new Dimension(130, 30));
         searchField.addActionListener(e -> performSearch());
 
         JButton searchBtn = UITheme.createSecondaryButton("Search");
@@ -90,8 +97,8 @@ public class StudentDashboardPanel extends JPanel {
         searchControls.add(searchField);
         searchControls.add(searchBtn);
         searchControls.add(requestBtn);
-        searchHeader.add(searchControls, BorderLayout.EAST);
-        searchCard.add(searchHeader, BorderLayout.NORTH);
+        topPanel.add(searchControls);
+        searchCard.add(topPanel, BorderLayout.NORTH);
 
         String[] searchCols = {"ISBN", "Title", "Author", "Category", "Available"};
         searchTableModel = new DefaultTableModel(searchCols, 0) {
@@ -135,10 +142,10 @@ public class StudentDashboardPanel extends JPanel {
         reqCard.add(reqScroll, BorderLayout.CENTER);
         centerGrid.add(reqCard);
 
-        // --- Card 3: My History & Active Loans ---
+        // --- Card 3: My History & Issued Books ---
         UITheme.CardPanel historyCard = new UITheme.CardPanel(new BorderLayout(0, 10));
         historyCard.setBorder(new EmptyBorder(12, 12, 12, 12));
-        JLabel histTitle = UITheme.createSectionHeader("My Borrowing History & Active Loans");
+        JLabel histTitle = UITheme.createSectionHeader("My Borrowing History & Issued Books");
         historyCard.add(histTitle, BorderLayout.NORTH);
 
         String[] historyCols = {"Tx ID", "Book ID", "Issue Date", "Due Date", "Return Date", "Fine", "Status"};
@@ -249,6 +256,7 @@ public class StudentDashboardPanel extends JPanel {
     public void refreshData() {
         Student student = app.getLoggedInStudent();
         if (student == null) return;
+        studentGreetingLbl.setText("Logged in as " + student.getName() + " (" + student.getKtuId() + ")");
 
         searchField.setText("");
         performSearch();

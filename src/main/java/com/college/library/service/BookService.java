@@ -3,10 +3,12 @@ package com.college.library.service;
 import com.college.library.dao.BookDAO;
 import com.college.library.exception.LibraryException;
 import com.college.library.model.Book;
+import com.college.library.model.Category;
 
-import java.util.List;
+import java.util.*;
 
 public class BookService {
+    private static final Set<String> VALID_STATUSES = Set.of("AVAILABLE", "ISSUED", "LOST", "DAMAGED");
     private final BookDAO bookDAO;
 
     public BookService(BookDAO bookDAO) {
@@ -45,7 +47,7 @@ public class BookService {
         return bookDAO.findAll();
     }
 
-    public List<com.college.library.model.Category> getAllCategories() throws LibraryException {
+    public List<Category> getAllCategories() throws LibraryException {
         return bookDAO.getAllCategories();
     }
 
@@ -57,22 +59,21 @@ public class BookService {
         if (book.getTitle() == null || book.getTitle().trim().isEmpty()) {
             throw new LibraryException("Book title is required.");
         }
-        if (book.getStatus() == null || (!book.getStatus().equals("AVAILABLE") && !book.getStatus().equals("ISSUED") 
-            && !book.getStatus().equals("LOST") && !book.getStatus().equals("DAMAGED"))) {
+        if (book.getStatus() == null || !VALID_STATUSES.contains(book.getStatus())) {
             throw new LibraryException("Invalid book status.");
         }
     }
 
     public List<Object[]> searchAvailableBooks(String query) throws LibraryException {
         List<Book> allBooks = bookDAO.findAll();
-        List<com.college.library.model.Category> categories = bookDAO.getAllCategories();
+        List<Category> categories = bookDAO.getAllCategories();
         
-        java.util.Map<Integer, String> catMap = new java.util.HashMap<>();
-        for (com.college.library.model.Category c : categories) {
+        Map<Integer, String> catMap = new HashMap<>();
+        for (Category c : categories) {
             catMap.put(c.getId(), c.getName());
         }
         
-        java.util.Map<String, Object[]> grouped = new java.util.LinkedHashMap<>();
+        Map<String, Object[]> grouped = new LinkedHashMap<>();
         String lowerQuery = query == null ? "" : query.toLowerCase().trim();
         
         for (Book b : allBooks) {
@@ -82,26 +83,25 @@ public class BookService {
                               b.getIsbn().toLowerCase().contains(lowerQuery);
             if (!matches) continue;
             
-            Object[] row = grouped.get(b.getIsbn());
-            if (row == null) {
-                String catName = catMap.getOrDefault(b.getCategoryId(), "Unknown");
-                row = new Object[] { b.getIsbn(), b.getTitle(), b.getAuthor(), catName, 0 };
-                grouped.put(b.getIsbn(), row);
-            }
+            Object[] row = grouped.computeIfAbsent(b.getIsbn(), isbn -> new Object[]{
+                isbn,
+                b.getTitle(),
+                b.getAuthor(),
+                catMap.getOrDefault(b.getCategoryId(), "Unknown"),
+                0
+            });
             if ("AVAILABLE".equals(b.getStatus())) {
                 row[4] = (Integer) row[4] + 1;
             }
         }
-        return new java.util.ArrayList<>(grouped.values());
+        return new ArrayList<>(grouped.values());
     }
     
     public String getFirstAvailableBookId(String isbn) throws LibraryException {
-        List<Book> books = bookDAO.findByIsbn(isbn);
-        for (Book b : books) {
-            if ("AVAILABLE".equals(b.getStatus())) {
-                return b.getAccessionId();
-            }
-        }
-        return null;
+        return bookDAO.findByIsbn(isbn).stream()
+                .filter(b -> "AVAILABLE".equals(b.getStatus()))
+                .map(Book::getAccessionId)
+                .findFirst()
+                .orElse(null);
     }
 }
