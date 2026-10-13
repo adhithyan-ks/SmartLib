@@ -5,6 +5,7 @@ import com.college.library.dao.BorrowRequestDAO;
 import com.college.library.dao.BorrowTransactionDAO;
 import com.college.library.dao.ReservationDAO;
 import com.college.library.dao.StudentDAO;
+import com.college.library.dto.ActiveBorrowingDTO;
 import com.college.library.exception.LibraryException;
 import com.college.library.model.Book;
 import com.college.library.model.BorrowRequest;
@@ -15,11 +16,14 @@ import com.college.library.util.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BorrowService {
     private final BorrowTransactionDAO transactionDAO;
@@ -27,16 +31,30 @@ public class BorrowService {
     private final StudentDAO studentDAO;
     private final ReservationDAO reservationDAO;
     private final BorrowRequestDAO borrowRequestDAO;
+    private Clock clock;
     
     private static final double FINE_PER_DAY = 10.0;
     private static final int MAX_BORROW_DAYS = 14;
 
     public BorrowService(BorrowTransactionDAO transactionDAO, BookDAO bookDAO, StudentDAO studentDAO, ReservationDAO reservationDAO, BorrowRequestDAO borrowRequestDAO) {
+        this(transactionDAO, bookDAO, studentDAO, reservationDAO, borrowRequestDAO, Clock.systemDefaultZone());
+    }
+
+    public BorrowService(BorrowTransactionDAO transactionDAO, BookDAO bookDAO, StudentDAO studentDAO, ReservationDAO reservationDAO, BorrowRequestDAO borrowRequestDAO, Clock clock) {
         this.transactionDAO = transactionDAO;
         this.bookDAO = bookDAO;
         this.studentDAO = studentDAO;
         this.reservationDAO = reservationDAO;
         this.borrowRequestDAO = borrowRequestDAO;
+        this.clock = clock != null ? clock : Clock.systemDefaultZone();
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock != null ? clock : Clock.systemDefaultZone();
+    }
+
+    public Clock getClock() {
+        return clock;
     }
 
     public void issueBook(String studentId, String bookId, int librarianId) throws LibraryException {
@@ -63,8 +81,9 @@ public class BorrowService {
                 bt.setStudentId(studentId);
                 bt.setBookId(bookId);
                 bt.setLibrarianId(librarianId);
-                bt.setIssueDate(LocalDate.now());
-                bt.setDueDate(LocalDate.now().plusDays(MAX_BORROW_DAYS));
+                LocalDate today = LocalDate.now(clock);
+                bt.setIssueDate(today);
+                bt.setDueDate(today.plusDays(MAX_BORROW_DAYS));
                 bt.setFine(0.0);
                 bt.setStatus("ACTIVE");
                 
@@ -86,7 +105,7 @@ public class BorrowService {
                 BorrowTransaction bt = transactionDAO.findActiveByBookId(bookId)
                         .orElseThrow(() -> new LibraryException("No active borrow transaction found for this book."));
                 
-                LocalDate now = LocalDate.now();
+                LocalDate now = LocalDate.now(clock);
                 double fine = 0.0;
                 if (now.isAfter(bt.getDueDate())) {
                     long daysOverdue = ChronoUnit.DAYS.between(bt.getDueDate(), now);
@@ -179,6 +198,89 @@ public class BorrowService {
 
     public List<BorrowTransaction> getStudentHistory(String studentId) throws LibraryException {
         return transactionDAO.findByStudentId(studentId);
+    }
+
+    public List<ActiveBorrowingDTO> getAllActiveBorrowings() throws LibraryException {
+        List<ActiveBorrowingDTO> list = transactionDAO.findAllActiveBorrowings();
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        LocalDate today = LocalDate.now(clock);
+        List<ActiveBorrowingDTO> result = new ArrayList<>();
+        for (ActiveBorrowingDTO item : list) {
+            if (item == null || !"ACTIVE".equalsIgnoreCase(item.getStatus())) {
+                continue;
+            }
+            long daysOverdue = 0;
+            double currentFine = 0.0;
+            if (item.getDueDate() != null && today.isAfter(item.getDueDate())) {
+                daysOverdue = ChronoUnit.DAYS.between(item.getDueDate(), today);
+                currentFine = daysOverdue * FINE_PER_DAY;
+            }
+            item.setDaysOverdue(daysOverdue);
+            item.setCurrentFine(currentFine);
+            result.add(item);
+        }
+
+        result.sort((a, b) -> {
+            boolean aOverdue = a.getDueDate() != null && a.getDueDate().isBefore(today);
+            boolean bOverdue = b.getDueDate() != null && b.getDueDate().isBefore(today);
+            if (aOverdue != bOverdue) {
+                return aOverdue ? -1 : 1;
+            }
+            if (a.getDueDate() == null && b.getDueDate() == null) {
+                return Integer.compare(a.getTransactionId(), b.getTransactionId());
+            }
+            if (a.getDueDate() == null) return 1;
+            if (b.getDueDate() == null) return -1;
+            int cmp = a.getDueDate().compareTo(b.getDueDate());
+            if (cmp != 0) return cmp;
+            return Integer.compare(a.getTransactionId(), b.getTransactionId());
+        });
+
+        return result;
+    }
+
+    public List<ActiveBorrowingDTO> filterActiveBorrowings(List<ActiveBorrowingDTO> borrowings, String filter, String searchQuery) {
+        if (borrowings == null) {
+            return new ArrayList<>();
+        }
+        LocalDate today = LocalDate.now(clock);
+        String query = searchQuery != null ? searchQuery.trim().toLowerCase() : "";
+        String filterType = filter != null ? filter.trim().toUpperCase().replace(" ", "_") : "ALL_ACTIVE";
+
+        return borrowings.stream()
+                .filter(b -> {
+                    if (b == null) return false;
+
+                    if ("OVERDUE".equals(filterType)) {
+                        if (b.getDueDate() == null || !b.getDueDate().isBefore(today)) {
+                            return false;
+                        }
+                    } else if ("DUE_TODAY".equals(filterType)) {
+                        if (b.getDueDate() == null || !b.getDueDate().isEqual(today)) {
+                            return false;
+                        }
+                    }
+
+                    if (!query.isEmpty()) {
+                        boolean matchesStudentId = b.getStudentId() != null && b.getStudentId().toLowerCase().contains(query);
+                        boolean matchesStudentName = b.getStudentName() != null && b.getStudentName().toLowerCase().contains(query);
+                        boolean matchesBookId = b.getBookAccessionId() != null && b.getBookAccessionId().toLowerCase().contains(query);
+                        boolean matchesBookTitle = b.getBookTitle() != null && b.getBookTitle().toLowerCase().contains(query);
+                        if (!matchesStudentId && !matchesStudentName && !matchesBookId && !matchesBookTitle) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<ActiveBorrowingDTO> getActiveBorrowings(String filter, String searchQuery) throws LibraryException {
+        List<ActiveBorrowingDTO> all = getAllActiveBorrowings();
+        return filterActiveBorrowings(all, filter, searchQuery);
     }
     
     // Borrow Request Methods

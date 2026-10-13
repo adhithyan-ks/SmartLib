@@ -1,6 +1,7 @@
 package com.college.library.dao.impl;
 
 import com.college.library.dao.BorrowTransactionDAO;
+import com.college.library.dto.ActiveBorrowingDTO;
 import com.college.library.exception.LibraryException;
 import com.college.library.model.BorrowTransaction;
 import com.college.library.util.DatabaseConnection;
@@ -162,6 +163,46 @@ public class BorrowTransactionDAOImpl implements BorrowTransactionDAO {
             throw new LibraryException("Error counting active transactions: " + e.getMessage(), e);
         }
         return 0;
+    }
+
+    @Override
+    public List<ActiveBorrowingDTO> findAllActiveBorrowings() throws LibraryException {
+        List<ActiveBorrowingDTO> list = new ArrayList<>();
+        String sql = "SELECT bt.id, bt.student_id, s.name AS student_name, bt.book_id, b.title AS book_title, " +
+                     "bt.issue_date, bt.due_date, bt.status " +
+                     "FROM borrow_transactions bt " +
+                     "JOIN students s ON bt.student_id = s.ktu_id " +
+                     "JOIN books b ON bt.book_id = b.accession_id " +
+                     "WHERE bt.status = 'ACTIVE' " +
+                     "ORDER BY bt.due_date ASC, bt.id ASC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                ActiveBorrowingDTO dto = new ActiveBorrowingDTO();
+                dto.setTransactionId(rs.getInt("id"));
+                dto.setStudentId(rs.getString("student_id"));
+                dto.setStudentName(rs.getString("student_name"));
+                dto.setBookAccessionId(rs.getString("book_id"));
+                dto.setBookTitle(rs.getString("book_title"));
+
+                Date issueDate = rs.getDate("issue_date");
+                if (issueDate != null) {
+                    dto.setIssueDate(issueDate.toLocalDate());
+                }
+
+                Date dueDate = rs.getDate("due_date");
+                if (dueDate != null) {
+                    dto.setDueDate(dueDate.toLocalDate());
+                }
+
+                dto.setStatus(rs.getString("status"));
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            throw new LibraryException("Error retrieving active borrowings: " + e.getMessage(), e);
+        }
+        return list;
     }
 
     private BorrowTransaction mapResultSetToBorrowTransaction(ResultSet rs) throws SQLException {
