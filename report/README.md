@@ -3,18 +3,17 @@
 **Course:** PBCST304 – Object Oriented Programming  
 **Institution:** College of Engineering Trivandrum (CET), APJ Abdul Kalam Technological University (KTU)  
 **Authors:**
-- Adhithyan K S (`TVE23CS001`)
-- Jenil Prince (`TVE23CS064`)
+- Adhithyan K S
+- Abhinand V P
+- Prathyush
+- Jenil Prince
+- Derin Jose Sanjith
 
 ---
 
 ## 📄 Overview
 
-This directory contains the complete LaTeX source code, figures, database diagrams, screenshots, and bibliography for the **SmartLib Course Project Report**, prepared in accordance with the official guidelines outlined in `REPORT.md`.
-
-### Project Submission Details
-- **Soft Copy Submission (GCR):** 27 October 2026
-- **Hard Copy Submission (Soft-bound):** 28 October 2026
+This directory contains the complete LaTeX source code, figures, database diagrams, screenshots, and bibliography for the **SmartLib Course Project Report**, prepared in accordance with the guidelines outlined in `REPORT.md`.
 
 ---
 
