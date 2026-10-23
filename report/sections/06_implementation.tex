@@ -1,0 +1,166 @@
+\chapter{Implementation}
+
+\section{Development Platform and Toolchain}
+SmartLib was developed using standard Java SE 17 (Long-Term Support) on modern Linux and Windows environments. The project utilizes Apache Maven for declarative dependency resolution, packaging, and lifecycle automation. A project-level Maven Wrapper (\texttt{mvnw} / \texttt{mvnw.cmd}) is included to enable reproducible builds across heterogeneous workstations without requiring manual Maven installations.
+
+\section{Implementation of Object-Oriented Programming (OOP) Principles}
+
+\subsection{Encapsulation and Information Hiding}
+Every domain model in SmartLib encapsulates its internal state using private member fields, restricting direct mutation and exposing controlled public getters and setters. Input validation and invariant preservation occur at the domain boundary:
+\begin{lstlisting}[language=Java, caption={Encapsulation in Book Entity}]
+public class Book {
+    private String accessionId;
+    private String isbn;
+    private String title;
+    private String author;
+    private int categoryId;
+    private BookStatus status;
+
+    public BookStatus getStatus() { return status; }
+    public void setStatus(BookStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        this.status = status;
+    }
+}
+\end{lstlisting}
+
+\subsection{Abstraction and Interface Segregation}
+Abstraction is rigorously achieved through the Data Access Object (DAO) layer. The generic interface \texttt{CrudDAO<T, ID>} defines the core persistence contract, isolating callers from SQL queries, drivers, and connection strings:
+\begin{lstlisting}[language=Java, caption={Generic CRUD Abstraction}]
+public interface CrudDAO<T, ID> {
+    void save(T entity) throws SQLException;
+    Optional<T> findById(ID id) throws SQLException;
+    List<T> findAll() throws SQLException;
+    void update(T entity) throws SQLException;
+    void delete(ID id) throws SQLException;
+}
+\end{lstlisting}
+Concrete entities specialize this abstraction by extending the base interface (e.g., \texttt{BookDAO extends CrudDAO<Book, String>}), adding domain-specific query contracts such as \texttt{findByIsbn()} and \texttt{updateStatus()}.
+
+\subsection{Inheritance Hierarchies}
+Code duplication across user roles is eliminated through the \texttt{Person} generalization hierarchy. The abstract base class \texttt{Person} encapsulates fundamental human properties (\texttt{id}, \texttt{name}), while specialized subclasses (\texttt{Student} and \texttt{Librarian}) extend it with role-specific attributes:
+\begin{lstlisting}[language=Java, caption={Inheritance Hierarchy}]
+public abstract class Person {
+    protected String id;
+    protected String name;
+    public Person(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+    public String getId() { return id; }
+    public String getName() { return name; }
+}
+
+public class Student extends Person {
+    private String branch;
+    private int semester;
+    private String batch;
+    // specialized student methods
+}
+\end{lstlisting}
+
+\subsection{Polymorphism and Dynamic Dispatch}
+Polymorphism is leveraged extensively across both runtime service execution and unit testing. Services interact solely with DAO interfaces:
+\begin{lstlisting}[language=Java, caption={Dynamic Polymorphism via Dependency Injection}]
+public class BorrowService {
+    private final BorrowTransactionDAO transactionDAO;
+    private final BookDAO bookDAO;
+
+    public BorrowService(BorrowTransactionDAO txDAO, BookDAO bookDAO, ...) {
+        this.transactionDAO = txDAO;
+        this.bookDAO = bookDAO;
+    }
+}
+\end{lstlisting}
+At application runtime, \texttt{MainApplication} injects concrete implementations (\texttt{BorrowTransactionDAOImpl}, \texttt{BookDAOImpl}) that interact with MySQL over JDBC. During unit test execution, test fixtures inject in-memory mock stubs implementing the exact same interfaces, verifying business logic without side effects.
+
+\section{Database Connectivity and Defensive JDBC Engineering}
+
+\subsection{The \texttt{DatabaseConnection} Singleton Factory}
+Database connections are managed via a centralized singleton factory (\texttt{DatabaseConnection.java}) that loads credentials dynamically from external configuration files:
+\begin{lstlisting}[language=Java, caption={Dynamic Connection Factory}]
+public class DatabaseConnection {
+    private static Properties props = new Properties();
+    static {
+        try (InputStream in = DatabaseConnection.class
+                .getClassLoader().getResourceAsStream("database.properties")) {
+            props.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load DB properties", e);
+        }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+            props.getProperty("db.url"),
+            props.getProperty("db.user"),
+            props.getProperty("db.password")
+        );
+    }
+}
+\end{lstlisting}
+
+\subsection{SQL Injection Mitigation and Resource Safety}
+SmartLib strictly prohibits dynamic string concatenation when formulating database queries. All queries utilize parameterized \texttt{PreparedStatement} objects, and all database resources are wrapped in Java \texttt{try-with-resources} blocks to guarantee leak-free deterministic resource cleanup:
+\begin{lstlisting}[language=Java, caption={Defensive JDBC Operation in BookDAOImpl}]
+String sql = "SELECT * FROM books WHERE accession_id = ?";
+try (Connection conn = DatabaseConnection.getConnection();
+     PreparedStatement stmt = conn.prepareStatement(sql)) {
+    stmt.setString(1, accessionId);
+    try (ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+            return Optional.of(mapResultSetToBook(rs));
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Critical Business Logic and Algorithms}
+
+\subsection{Clock-Aware Overdue Fine Calculation Engine}
+The circulation engine computes overdue periods and financial liabilities dynamically using Java's \texttt{java.time} API. To enable deterministic unit testing without altering workstation system clocks, the engine supports temporal clock injection via \texttt{java.time.Clock}:
+\begin{lstlisting}[language=Java, caption={Clock-Aware Fine Calculation Engine}]
+public BigDecimal calculateOverdueFine(LocalDate dueDate) {
+    LocalDate today = LocalDate.now(clock);
+    if (today.isAfter(dueDate)) {
+        long daysOverdue = ChronoUnit.DAYS.between(dueDate, today);
+        return BigDecimal.valueOf(daysOverdue)
+                         .multiply(DAILY_FINE_RATE); // Rs 10.00 / day
+    }
+    return BigDecimal.ZERO;
+}
+\end{lstlisting}
+
+\subsection{Direct Book Issue Algorithm with Concurrency Safeguard}
+Issuing a book requires validating student status, verifying book availability, persisting a loan transaction, and updating the physical inventory status:
+\begin{enumerate}
+    \item Verify that the student exists in the database and maintains an \texttt{ACTIVE} standing.
+    \item Fetch the physical book record using \texttt{accession\_id}; verify that its status is currently \texttt{AVAILABLE}.
+    \item Set issue date to current date; calculate due date as $\text{Issue Date} + 14 \text{ days}$.
+    \item Persist a new record in \texttt{borrow\_transactions} with status \texttt{ACTIVE} and initial fine of $0.00$.
+    \item Atomically update the book status in \texttt{books} to \texttt{ISSUED}.
+\end{enumerate}
+
+\subsection{Book Return and Reservation Fulfillment Trigger}
+When a book is returned:
+\begin{enumerate}
+    \item The active transaction is retrieved and marked \texttt{COMPLETED}, recording the actual return date and final assessed fine.
+    \item The book's status is reset to \texttt{AVAILABLE}.
+    \item The system queries the \texttt{reservations} table for the earliest \texttt{PENDING} reservation matching the book's ISBN.
+    \item If a pending reservation is found, the reservation is marked \texttt{FULFILLED}, and an immediate notification dialog alerts the librarian to place the physical volume on hold for the reserving student.
+\end{enumerate}
+
+\subsection{Automated KTU Registration ID Parser}
+Student enrollment and login screens parse KTU registration numbers via regular expressions:
+\begin{lstlisting}[language=Java, caption={KTU ID Validation and Batch Derivation}]
+String regex = "^[A-Z]{3}[0-9]{2}[A-Z]{2}[0-9]{3}$";
+if (ktuId.matches(regex)) {
+    String yearCode = ktuId.substring(3, 5); // e.g. "23" -> 2023
+    int startYear = 2000 + Integer.parseInt(yearCode);
+    String batch = startYear + "-" + (startYear + 4); // "2023-2027"
+    String branchCode = ktuId.substring(5, 7); // "CS" -> "CSE"
+}
+\end{lstlisting}
+This removes manual data entry errors during new student registrations.

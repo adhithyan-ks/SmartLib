@@ -1,0 +1,128 @@
+\chapter{Requirements Specification}
+
+\section{Functional Requirements}
+The functional requirements specify the actions, operations, and behaviors that the SmartLib software system must support.
+
+\begin{enumerate}[label=\textbf{FR-\arabic*:}, leftmargin=2.5cm]
+    \item \textbf{User Authentication and Authorization:}
+    \begin{itemize}
+        \item The system must provide distinct login screens for Librarians and Students.
+        \item Student registration must enforce validation of standard KTU Registration IDs using regex pattern \texttt{\^{}[A-Z]\{3\}[0-9]\{2\}[A-Z]\{2\}[0-9]\{3\}\$}.
+        \item All passwords must be salted and hashed using 12 rounds of BCrypt before persistence; plain text passwords must never be stored.
+        \item Sessions must maintain user context across screen transitions and prohibit unauthorized administrative access to student sessions.
+    \end{itemize}
+
+    \item \textbf{Book Catalog and Inventory Management:}
+    \begin{itemize}
+        \item Librarians must be able to add, update, delete, and view books.
+        \item Each physical book copy must be tracked via a unique \texttt{accession\_id} (e.g., \texttt{B1001}), while sharing bibliographic attributes such as ISBN, title, author, and academic category.
+        \item Book inventory status must transition strictly between defined enumerations: \texttt{AVAILABLE}, \texttt{ISSUED}, \texttt{LOST}, and \texttt{DAMAGED}.
+        \item The catalog must support real-time text-based search across titles, authors, ISBNs, and categories.
+    \end{itemize}
+
+    \item \textbf{Student Membership and Clearance Management:}
+    \begin{itemize}
+        \item Librarians must be able to enroll students, edit profiles, and view academic standings.
+        \item Entering a valid KTU ID must automatically parse and populate the student's admission year, academic batch, and engineering branch.
+        \item The system must provide a clearance check mechanism that inspects whether a student has any outstanding unreturned books or unpaid fines before granting graduation/transfer clearance.
+    \end{itemize}
+
+    \item \textbf{Circulation Desk and Active Borrowings Management:}
+    \begin{itemize}
+        \item Librarians must be able to issue available books directly to enrolled students upon validating student ID and accession ID.
+        \item The default loan period must be configured to 14 calendar days from the date of issue.
+        \item The circulation desk must provide a live 10-column inventory table displaying all currently active borrowings (Transaction ID, Book ID, Title, Author, Student ID, Student Name, Issue Date, Due Date, Days Overdue, and Accrued Fine).
+        \item The system must dynamically compute overdue duration ($\max(0, \text{Current Date} - \text{Due Date})$) and accrued fine ($\text{Days Overdue} \times \text{\rupee} 10.00$) in real time.
+        \item Librarians must be able to filter active loans by status (\texttt{All Active}, \texttt{Overdue}, \texttt{Due Today}) and execute direct one-click returns from selected table rows.
+    \end{itemize}
+
+    \item \textbf{Borrow Request Workflow:}
+    \begin{itemize}
+        \item Students must be able to browse available books and submit digital borrow requests through their self-service dashboard.
+        \item Librarians must be able to view all pending requests, approve valid requests (which transitions the book to \texttt{ISSUED} and generates an active transaction), or reject requests with appropriate reason logging.
+    \end{itemize}
+
+    \item \textbf{Title Reservation Queue Management:}
+    \begin{itemize}
+        \item Students must be able to place reservations on books that are currently issued or unavailable, referenced by ISBN.
+        \item Reservations must be sequenced in a strict First-In, First-Out (FIFO) queue.
+        \item When an issued book is returned at the circulation desk, the system must detect any pending reservations for that ISBN and display an immediate notification prompting the librarian to hold the book for the reserving student.
+    \end{itemize}
+
+    \item \textbf{Executive Analytics and Dashboard:}
+    \begin{itemize}
+        \item The Librarian dashboard must aggregate and display real-time Key Performance Indicators (KPIs): Total Books in Catalog, Active Borrowings Count, Enrolled Active Students, and Overdue Books Count.
+        \item The dashboard must present a live summary table of the most popular books based on historical borrowing frequency.
+    \end{itemize}
+\end{enumerate}
+
+\section{Non-Functional Requirements}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*:}, leftmargin=2.5cm]
+    \item \textbf{Performance and Latency:}
+    \begin{itemize}
+        \item All database search and retrieval operations must execute within 500 milliseconds for catalog collections exceeding 10,000 records.
+        \item UI panel transitions managed by \texttt{CardLayout} must be instantaneous ($< 100$ milliseconds).
+    \end{itemize}
+
+    \item \textbf{Security and Data Integrity:}
+    \begin{itemize}
+        \item Complete protection against SQL Injection attacks through universal enforcement of parameterized \texttt{PreparedStatement} queries across all DAO implementations.
+        \item Passwords protected using BCrypt hashing with a computational cost factor of 12 rounds.
+        \item Externalization of database credentials into \texttt{database.properties}, which is excluded from version control systems.
+    \end{itemize}
+
+    \item \textbf{Usability and Ergonomics:}
+    \begin{itemize}
+        \item Consistent visual styling and typography across all screens powered by a centralized design system (\texttt{UITheme}).
+        \item Visual differentiation using color-coded status pills (e.g., Green for Available, Red for Overdue, Orange for Pending).
+        \item Robust table selection and deselection handling via a dedicated \texttt{TableSelectionHelper}.
+    \end{itemize}
+
+    \item \textbf{Reliability, Maintainability, and Testability:}
+    \begin{itemize}
+        \item Adherence to SOLID principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
+        \item High automated test coverage with JUnit 5, isolating business logic via mock DAOs and temporal clock injection.
+    \end{itemize}
+\end{enumerate}
+
+\section{Hardware and Software Environment}
+
+\subsection{Hardware Requirements}
+\begin{table}[h!]
+    \centering
+    \caption{Hardware Environment Specifications}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Component} & \textbf{Minimum Requirement} & \textbf{Recommended Specification} \\
+        \midrule
+        Processor & Dual-Core x86\_64 (1.8 GHz) & Quad-Core Intel Core i5 / AMD Ryzen 5 \\
+        RAM & 4 GB & 8 GB or higher \\
+        Storage & 500 MB free disk space & 2 GB SSD storage \\
+        Display & $1024 \times 768$ resolution & $1920 \times 1080$ Full HD resolution \\
+        Network & Localhost TCP loopback & 100 Mbps Local Area Network \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:hardware_specs}
+\end{table}
+
+\subsection{Software Environment and Dependency Matrix}
+\begin{table}[h!]
+    \centering
+    \caption{Software Environment and Technical Stack}
+    \begin{tabular}{llp{7cm}}
+        \toprule
+        \textbf{Layer / Component} & \textbf{Technology} & \textbf{Version / Description} \\
+        \midrule
+        Runtime Environment & Java SE Development Kit (JDK) & Version 17 LTS (Adoptium / Oracle OpenJDK) \\
+        GUI Framework & Java Swing \& AWT & Native standard library (\texttt{javax.swing}) \\
+        Database Engine & MySQL Community Server & Version 8.0 or higher \\
+        Build \& Dependency Tool & Apache Maven & Version 3.8+ (Maven Wrapper \texttt{mvnw} bundled) \\
+        Testing Framework & JUnit Jupiter (JUnit 5) & Version 5.10.0 \\
+        JDBC Driver & MySQL Connector/J & \texttt{com.mysql:mysql-connector-j:9.4.0} \\
+        Security Library & jBCrypt & \texttt{org.mindrot:jbcrypt:0.4} \\
+        Operating System & Cross-Platform & Linux (Ubuntu 22.04/24.04), Windows 10/11 \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:software_specs}
+\end{table}

@@ -1,0 +1,37 @@
+\chapter{Problem Statement and Objectives}
+
+\section{Problem Statement}
+In academic institutions affiliated with APJ Abdul Kalam Technological University (KTU), managing the circulation of library literature among hundreds of engineering students requires rigorous tracking, strict adherence to loan durations, and impartial enforcement of overdue fine regulations. Conventional manual registers and ad-hoc single-tier software applications suffer from critical operational failures:
+\begin{enumerate}
+    \item \textbf{Circulation Desk Opacity:} Librarians lack real-time computational oversight of currently loaned books, which makes calculating overdue days and accrued fines tedious, error-prone, and inconsistent.
+    \item \textbf{Data Inconsistency and Concurrency Anomalies:} Without strict relational constraints and database-level transaction locking, concurrent operations (such as attempting to issue an already loaned book or reserving a title without checking active inventory) create corrupt data states.
+    \item \textbf{Inadequate Security and Access Control:} Many departmental library systems store passwords in plain text or lack clear separation between administrative privileges and student viewing rights.
+    \item \textbf{Architectural Fragility:} Codebases that mix database SQL queries directly inside GUI event listeners violate the Single Responsibility Principle (SRP) and Dependency Inversion Principle (DIP), making code maintenance, feature enhancement, and unit testing virtually impossible.
+\end{enumerate}
+
+Therefore, the core engineering challenge is to design, implement, and rigorously test a multi-tier, object-oriented desktop library management system that provides synchronized, role-based workflows for librarians and students, enforces database integrity, computes overdue fines dynamically, and adheres strictly to industry-standard design patterns.
+
+\section{Project Objectives}
+To address the defined problem statement, the SmartLib project was structured around the following concrete objectives:
+
+\subsection{Architectural Objectives}
+\begin{itemize}
+    \item \textbf{Tiered Separation of Concerns:} Implement a rigorous Multi-Tier Layered Architecture consisting of Presentation Layer (\texttt{gui}), Business Service Layer (\texttt{service}), Data Access Object Layer (\texttt{dao} and \texttt{dao.impl}), and Persistent Relational Database (MySQL).
+    \item \textbf{Interface-Driven Design:} Abstract all persistence operations behind generic interfaces (\texttt{CrudDAO<T, ID>}), ensuring the high-level business services remain completely decoupled from specific database queries and JDBC drivers.
+    \item \textbf{Defensive Database Engineering:} Guarantee ACID compliance by managing database connections through a dedicated connection manager, enforcing parameterized SQL queries via \texttt{PreparedStatement} to eliminate SQL injection vulnerabilities, and managing connection lifecycles via Java \texttt{try-with-resources}.
+\end{itemize}
+
+\subsection{Functional Objectives}
+\begin{itemize}
+    \item \textbf{Dual Role-Based Authentication:} Provide isolated authentication pipelines for Librarians and Students, securing credentials using industry-standard 12-round BCrypt salt hashing.
+    \item \textbf{Automated Circulation Desk \& Active Borrowings Tracking:} Equip the circulation desk with a live 10-column tracking grid of all active loans, dynamic overdue day calculation, clock-aware overdue fine estimation ($\text{\rupee} 10/\text{day}$), multi-column search, and direct single-click returns.
+    \item \textbf{Automated Reservation Pipeline:} Establish a FIFO reservation queue that permits students to reserve titles currently checked out, automatically alerting the librarian to fulfill pending reservations when the title is returned.
+    \item \textbf{Student Self-Service Portal:} Provide students with direct catalog browsing, real-time availability inquiries, online borrow request submissions, and clear oversight of personal loan records and accumulated dues.
+    \item \textbf{Institutional Data Integration:} Automate student validation and enrollment parsing based on standardized KTU registration ID formatting (e.g., regex pattern \texttt{\^{}[A-Z]\{3\}[0-9]\{2\}[A-Z]\{2\}[0-9]\{3\}\$}), extracting year, batch, and engineering branch dynamically.
+\end{itemize}
+
+\subsection{Quality and Verification Objectives}
+\begin{itemize}
+    \item \textbf{Automated Unit Testing:} Construct a comprehensive suite of automated unit tests using JUnit 5, validating domain services against mock DAO stubs and simulated temporal clocks without requiring an active external database connection.
+    \item \textbf{Industrial Ergonomics:} Build a professional, polished Java Swing user interface utilizing a cohesive design theme (\texttt{UITheme}), clean typography, card layout navigation, and custom table selection managers.
+\end{itemize}

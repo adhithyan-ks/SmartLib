@@ -1,0 +1,295 @@
+\chapter*{Appendices}
+\addcontentsline{toc}{chapter}{Appendices}
+\renewcommand{\thesection}{\Alph{section}}
+\setcounter{section}{0}
+
+\section{User Manual and Installation Instructions}
+
+This appendix provides a step-by-step technical guide for configuring, building, and running SmartLib on a fresh development machine.
+
+\subsection{Prerequisites Checklist}
+\begin{itemize}
+    \item \textbf{Java SE Development Kit (JDK 17 or higher):} Ensure \texttt{JAVA\_HOME} environment variable points to your JDK directory and \texttt{java -version} reports version 17 or above.
+    \item \textbf{MySQL Community Server (Version 8.0 or higher):} Installed and running on default TCP port \texttt{3306}.
+    \item \textbf{Git:} For cloning the repository.
+    \item \textbf{Maven:} Optional. The repository includes an executable Maven Wrapper (\texttt{mvnw} for Linux/macOS, \texttt{mvnw.cmd} for Windows).
+\end{itemize}
+
+\subsection{Database Initialization}
+\begin{enumerate}
+    \item Open MySQL Command Line Client or MySQL Workbench:
+    \begin{lstlisting}[language=SQL]
+    CREATE DATABASE smartlib;
+    USE smartlib;
+    \end{lstlisting}
+    \item Execute the database schema definition located at \texttt{src/main/resources/sql/schema.sql} to generate all 7 relational tables.
+    \item Execute the sample data population script located at \texttt{src/main/resources/sample\_data.sql} to seed default categories, books, student records, and librarian administrative accounts.
+\end{enumerate}
+
+\subsection{Database Configuration}
+\begin{enumerate}
+    \item Navigate to \texttt{src/main/resources/}.
+    \item Create a copy of \texttt{database.properties.example} and save it as \texttt{database.properties}.
+    \item Update the database credentials to match your local MySQL configuration:
+    \begin{lstlisting}
+    db.url=jdbc:mysql://localhost:3306/smartlib
+    db.user=root
+    db.password=YOUR_MYSQL_PASSWORD
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Building and Executing the Application}
+Open a terminal in the root repository folder:
+\begin{enumerate}
+    \item \textbf{Execute the Automated Test Suite:}
+    \begin{lstlisting}[language=bash]
+    # On Linux / macOS:
+    ./mvnw test
+    
+    # On Windows:
+    .\mvnw.cmd test
+    \end{lstlisting}
+    Verify that all 43 unit tests execute successfully.
+    
+    \item \textbf{Compile and Launch the GUI Desktop Application:}
+    \begin{lstlisting}[language=bash]
+    # On Linux / macOS:
+    ./mvnw compile exec:java -Dexec.mainClass="com.college.library.gui.MainApplication"
+    
+    # On Windows:
+    .\mvnw.cmd compile exec:java "-Dexec.mainClass=com.college.library.gui.MainApplication"
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Default User Credentials}
+\begin{table}[h!]
+    \centering
+    \caption{Default Seed Credentials for Verification}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Portal / Role} & \textbf{Identifier / Username} & \textbf{Default Password} & \textbf{Access Level} \\
+        \midrule
+        Librarian Portal & \texttt{admin} & \texttt{password123} & Full Administrative Access \\
+        Student Portal & \texttt{TVE23CS001} & \texttt{password123} & Student Self-Service \\
+        Student Portal & \texttt{TVE23CS002} & \texttt{password123} & Student Self-Service \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:seed_creds}
+\end{table}
+
+\subsection{Troubleshooting Matrix}
+\begin{table}[h!]
+    \centering
+    \caption{Common Setup Errors and Solutions}
+    \begin{tabular}{p{4.5cm}p{4cm}p{5.5cm}}
+        \toprule
+        \textbf{Error Message} & \textbf{Root Cause} & \textbf{Corrective Action} \\
+        \midrule
+        \texttt{Communications link failure} & MySQL service is stopped or port is not 3306 & Verify that MySQL service is running (\texttt{systemctl status mysql} or \texttt{services.msc}). \\
+        \midrule
+        \texttt{Access denied for user 'root'} & Incorrect password in configuration & Verify and update root password in \texttt{src/main/resources/database.properties}. \\
+        \midrule
+        \texttt{Unknown database 'smartlib'} & Database not initialized & Run \texttt{CREATE DATABASE smartlib;} in MySQL Workbench. \\
+        \midrule
+        \texttt{Table 'smartlib.books' doesn't exist} & Schema script not executed & Import and execute \texttt{src/main/resources/sql/schema.sql}. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:troubleshooting}
+\end{table}
+
+\newpage
+\section{Selected Source Code Listings}
+
+\subsection{Generic Base Data Access Object (\texttt{CrudDAO.java})}
+\begin{lstlisting}[language=Java, caption={Generic CrudDAO Interface}]
+package com.college.library.dao;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+public interface CrudDAO<T, ID> {
+    void save(T entity) throws SQLException;
+    Optional<T> findById(ID id) throws SQLException;
+    List<T> findAll() throws SQLException;
+    void update(T entity) throws SQLException;
+    void delete(ID id) throws SQLException;
+}
+\end{lstlisting}
+
+\subsection{Circulation Desk and Dynamic Fine Engine (\texttt{BorrowService.java})}
+\begin{lstlisting}[language=Java, caption={Core Methods in BorrowService.java}]
+package com.college.library.service;
+
+import com.college.library.dao.*;
+import com.college.library.dto.ActiveBorrowingDTO;
+import com.college.library.exception.LibraryException;
+import com.college.library.model.*;
+
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class BorrowService {
+    private final BorrowTransactionDAO transactionDAO;
+    private final BookDAO bookDAO;
+    private final StudentDAO studentDAO;
+    private final ReservationDAO reservationDAO;
+    private final BorrowRequestDAO borrowRequestDAO;
+    private final Clock clock;
+    
+    public static final BigDecimal DAILY_FINE_RATE = BigDecimal.valueOf(10.00);
+
+    public BorrowService(BorrowTransactionDAO txDAO, BookDAO bookDAO, 
+                         StudentDAO studentDAO, ReservationDAO resDAO, 
+                         BorrowRequestDAO reqDAO) {
+        this(txDAO, bookDAO, studentDAO, resDAO, reqDAO, Clock.systemDefaultZone());
+    }
+
+    public BorrowService(BorrowTransactionDAO txDAO, BookDAO bookDAO, 
+                         StudentDAO studentDAO, ReservationDAO resDAO, 
+                         BorrowRequestDAO reqDAO, Clock clock) {
+        this.transactionDAO = txDAO;
+        this.bookDAO = bookDAO;
+        this.studentDAO = studentDAO;
+        this.reservationDAO = resDAO;
+        this.borrowRequestDAO = reqDAO;
+        this.clock = clock;
+    }
+
+    public void issueBook(String studentId, String bookId, int librarianId) 
+            throws LibraryException {
+        try {
+            Optional<Student> student = studentDAO.findById(studentId);
+            if (student.isEmpty()) throw new LibraryException("Student not found.");
+            if (!"ACTIVE".equalsIgnoreCase(student.get().getStatus())) {
+                throw new LibraryException("Student account is not active.");
+            }
+
+            Optional<Book> book = bookDAO.findById(bookId);
+            if (book.isEmpty()) throw new LibraryException("Book not found.");
+            if (book.get().getStatus() != BookStatus.AVAILABLE) {
+                throw new LibraryException("Book is currently unavailable (" + book.get().getStatus() + ").");
+            }
+
+            LocalDate issueDate = LocalDate.now(clock);
+            LocalDate dueDate = issueDate.plusDays(14);
+
+            BorrowTransaction tx = new BorrowTransaction();
+            tx.setStudentId(studentId);
+            tx.setBookId(bookId);
+            tx.setLibrarianId(librarianId);
+            tx.setIssueDate(issueDate);
+            tx.setDueDate(dueDate);
+            tx.setFine(BigDecimal.ZERO);
+            tx.setStatus("ACTIVE");
+
+            transactionDAO.save(tx);
+            bookDAO.updateStatus(bookId, BookStatus.ISSUED);
+        } catch (SQLException e) {
+            throw new LibraryException("Database error during book issue: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean returnBook(String bookId, int librarianId) throws LibraryException {
+        try {
+            Optional<BorrowTransaction> activeTx = transactionDAO.findActiveByBookId(bookId);
+            if (activeTx.isEmpty()) {
+                throw new LibraryException("No active borrow transaction found for book ID: " + bookId);
+            }
+
+            BorrowTransaction tx = activeTx.get();
+            LocalDate returnDate = LocalDate.now(clock);
+            BigDecimal fine = calculateOverdueFine(tx.getDueDate());
+
+            tx.setReturnDate(returnDate);
+            tx.setFine(fine);
+            tx.setStatus("COMPLETED");
+
+            transactionDAO.update(tx);
+            bookDAO.updateStatus(bookId, BookStatus.AVAILABLE);
+
+            // Check reservation queue
+            Optional<Book> bookOpt = bookDAO.findById(bookId);
+            if (bookOpt.isPresent()) {
+                Optional<Reservation> pendingRes = reservationDAO.findEarliestPendingByIsbn(bookOpt.get().getIsbn());
+                if (pendingRes.isPresent()) {
+                    Reservation r = pendingRes.get();
+                    r.setStatus("FULFILLED");
+                    reservationDAO.update(r);
+                    return true; // Alert GUI that reservation is fulfilled
+                }
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new LibraryException("Database error during return: " + e.getMessage(), e);
+        }
+    }
+
+    public BigDecimal calculateOverdueFine(LocalDate dueDate) {
+        LocalDate today = LocalDate.now(clock);
+        if (today.isAfter(dueDate)) {
+            long daysOverdue = ChronoUnit.DAYS.between(dueDate, today);
+            return BigDecimal.valueOf(daysOverdue).multiply(DAILY_FINE_RATE);
+        }
+        return BigDecimal.ZERO;
+    }
+}
+\end{lstlisting}
+
+\subsection{Centralized Design System (\texttt{UITheme.java})}
+\begin{lstlisting}[language=Java, caption={Centralized UI Theme Styling Engine}]
+package com.college.library.gui;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+
+public class UITheme {
+    public static final Color BG_APP = new Color(248, 250, 252);
+    public static final Color BG_CARD = Color.WHITE;
+    public static final Color PRIMARY = new Color(37, 99, 235);
+    public static final Color PRIMARY_HOVER = new Color(29, 78, 216);
+    public static final Color TEXT_DARK = new Color(15, 23, 42);
+    public static final Color TEXT_MUTED = new Color(100, 116, 139);
+    public static final Color BORDER = new Color(226, 232, 240);
+
+    public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 22);
+    public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 15);
+    public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 13);
+    public static final Font FONT_BOLD = new Font("Segoe UI", Font.BOLD, 13);
+
+    public static JButton createPrimaryButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(FONT_BOLD);
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(PRIMARY);
+        btn.setFocusPainted(false);
+        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    public static void styleTable(JTable table) {
+        table.setFont(FONT_BODY);
+        table.setRowHeight(36);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setSelectionBackground(new Color(239, 246, 255));
+        table.setSelectionForeground(TEXT_DARK);
+        
+        JTableHeader header = table.getTableHeader();
+        header.setFont(FONT_BOLD);
+        header.setBackground(new Color(241, 245, 249));
+        header.setForeground(TEXT_DARK);
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
+    }
+}
+\end{lstlisting}

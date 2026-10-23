@@ -1,0 +1,130 @@
+\documentclass[12pt,a4paper]{report}
+
+% ==============================================================================
+% Packages & Configuration
+% ==============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3.0cm,
+    right=2.5cm
+}
+
+\usepackage{graphicx}
+\graphicspath{{figures/}{report/figures/}}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,tabularx,longtable,multirow}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.98,0.99}
+\definecolor{linkblue}{rgb}{0.1,0.2,0.6}
+
+\usepackage{listings}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!20}
+}
+\lstset{style=mystyle}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, calc}
+
+\usepackage[
+    colorlinks=true,
+    linkcolor=linkblue,
+    citecolor=linkblue,
+    urlcolor=linkblue,
+    pdfauthor={Adhithyan K S and Jenil Prince},
+    pdftitle={SmartLib: Multi-Tier College Library Management System Report}
+]{hyperref}
+
+\usepackage{cite}
+
+% Safe Rupee Symbol fallback definition
+\providecommand{\rupee}{\text{Rs.\,}}
+
+% Header and Footer Styling
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{15pt}
+\fancyhead[L]{\small \nouppercase{\leftmark}}
+\fancyhead[R]{\small SmartLib Project Report}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% ==============================================================================
+% Document Structure
+% ==============================================================================
+\begin{document}
+
+% 1. Title Page, 2. Abstract, 3. Table of Contents, 4. List of Figures, 5. List of Tables
+\input{sections/01_title_abstract}
+
+% 6. Introduction
+\input{sections/02_introduction}
+
+% 7. Problem Statement and Objectives
+\input{sections/03_objectives}
+
+% 8. Requirements Specification
+\input{sections/04_requirements}
+
+% 9. System Design
+\input{sections/05_system_design}
+
+% 10. Implementation
+\input{sections/06_implementation}
+
+% 11. Testing and Test Cases
+\input{sections/07_testing}
+
+% 12. Results
+\input{sections/08_results}
+
+% 13. Conclusion and Future Enhancements
+\input{sections/09_conclusion}
+
+% 14. References
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\addcontentsline{toc}{chapter}{References}
+
+% 15. Appendices
+\input{sections/10_appendices}
+
+\end{document}

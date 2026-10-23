@@ -1,0 +1,375 @@
+\chapter{System Design}
+
+\section{System Architecture}
+SmartLib is designed strictly according to the \textbf{Multi-Tier Layered Architectural Pattern}, embodying Separation of Concerns (SoC) and the Dependency Inversion Principle (DIP). Each layer maintains specific responsibilities and communicates strictly with adjacent layers through well-defined contracts.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    layer/.style={rectangle, draw=black!70, fill=blue!5, rounded corners=4pt, text width=13cm, inner sep=10pt, align=center},
+    arrow/.style={->, >=stealth, thick, color=blue!70!black}
+]
+    % Presentation Layer
+    \node[layer, fill=purple!8] (gui) {
+        \textbf{\large Presentation Layer (\texttt{com.college.library.gui})}\\[0.2cm]
+        \small \texttt{MainApplication} (JFrame + CardLayout View Router), \texttt{UITheme}, \texttt{TableSelectionHelper}\\
+        \footnotesize 7 Modular Panels: \texttt{LoginPanel}, \texttt{DashboardPanel}, \texttt{BookPanel}, \texttt{StudentPanel}, \texttt{BorrowPanel}, \texttt{ReservationPanel}, \texttt{StudentDashboardPanel}
+    };
+    
+    % Service Layer
+    \node[layer, fill=blue!8, below=1.2cm of gui] (service) {
+        \textbf{\large Business Logic \& Service Layer (\texttt{com.college.library.service})}\\[0.2cm]
+        \small \texttt{AuthService}, \texttt{BookService}, \texttt{StudentService}, \texttt{BorrowService}, \texttt{ReservationService}, \texttt{AnalyticsService}\\
+        \footnotesize Policy Enforcement, Clock-Aware Overdue Fine Calculation, Concurrency Verification, Reservation Queue Sequencing
+    };
+    
+    % DAO Layer
+    \node[layer, fill=teal!8, below=1.2cm of service] (dao) {
+        \textbf{\large Data Access Object Layer (\texttt{com.college.library.dao} \& \texttt{dao.impl})}\\[0.2cm]
+        \small \texttt{CrudDAO<T, ID>}, \texttt{BookDAO}, \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO}, \texttt{LibrarianDAO}\\
+        \footnotesize Object-Relational Mapping (ORM), Parameterized \texttt{PreparedStatement} Queries, Connection Lifecycle Management
+    };
+    
+    % Database Layer
+    \node[layer, fill=orange!8, below=1.2cm of dao] (db) {
+        \textbf{\large Persistent Relational Database (MySQL Engine)}\\[0.2cm]
+        \small Schema: \texttt{smartlib} on Localhost (Port 3306)\\
+        \footnotesize 7 Relational Tables: \texttt{librarians}, \texttt{students}, \texttt{categories}, \texttt{books}, \texttt{borrow\_transactions}, \texttt{reservations}, \texttt{borrow\_requests}
+    };
+    
+    % Connecting Arrows
+    \draw[arrow] (gui.south) -- (service.north) node[midway, right, font=\footnotesize] {Method Calls (DTOs / Domain POJOs)};
+    \draw[arrow] (service.south) -- (dao.north) node[midway, right, font=\footnotesize] {Interface Invocations (Polymorphism)};
+    \draw[arrow] (dao.south) -- (db.north) node[midway, right, font=\footnotesize] {Parameterized SQL over TCP/IP (JDBC)};
+\end{tikzpicture}
+\caption{SmartLib Multi-Tier Layered Architecture}
+\label{fig:system_architecture}
+\end{figure}
+
+\subsection{Layer Responsibilities}
+\begin{enumerate}
+    \item \textbf{Presentation Layer (\texttt{gui}):} Exclusively manages the visual components and user interactions using Java Swing and AWT. It contains zero SQL queries or business calculation logic. View transitions are driven by a centralized \texttt{CardLayout} router managed by \texttt{MainApplication}.
+    \item \textbf{Business Service Layer (\texttt{service}):} Encapsulates institutional policies, operational constraints, and domain algorithms. It coordinates transactions, verifies loan limits, computes clock-aware fines, manages FIFO reservation fulfillment, and communicates strictly through DAO interface references.
+    \item \textbf{Data Access Object Layer (\texttt{dao} and \texttt{dao.impl}):} Implements the DAO design pattern to insulate business services from database specifics. It encapsulates raw SQL queries, prepares statements, and maps relational result sets into Java domain entities.
+    \item \textbf{Persistence Layer (MySQL):} Manages data storage, relational integrity, primary and foreign key constraints, indexes, and ACID guarantees.
+\end{enumerate}
+
+\section{Class Diagram}
+The static structure of SmartLib is centered around domain models, generic data access interfaces, and business services.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    classbox/.style={rectangle, draw=black!80, fill=yellow!10, rounded corners=2pt, font=\scriptsize, align=left, inner sep=5pt},
+    arrow/.style={->, >=stealth, thick}
+]
+    % Models
+    \node[classbox, text width=4.5cm] (person) {
+        \textbf{\centerline{<<abstract>> Person}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \# id : String\\
+        \# name : String\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getId() : String\\
+        + getName() : String
+    };
+    
+    \node[classbox, text width=4.5cm, below left=1.0cm and -0.8cm of person] (student) {
+        \textbf{\centerline{Student}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - ktuId : String\\
+        - branch : String\\
+        - semester : int\\
+        - batch : String\\
+        - email : String\\
+        - phone : String\\
+        - status : String\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getKtuId() : String\\
+        + getBranch() : String
+    };
+    
+    \node[classbox, text width=4.2cm, below right=1.0cm and -0.8cm of person] (librarian) {
+        \textbf{\centerline{Librarian}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - id : int\\
+        - username : String\\
+        - passwordHash : String\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getUsername() : String\\
+        + setUsername(String)
+    };
+    
+    \draw[arrow] (student.north) -- ++(0, 0.4) -| (person.south);
+    \draw[arrow] (librarian.north) -- ++(0, 0.4) -| (person.south);
+    
+    % Book Entity
+    \node[classbox, text width=4.5cm, right=1.5cm of person] (book) {
+        \textbf{\centerline{Book}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - accessionId : String\\
+        - isbn : String\\
+        - title : String\\
+        - author : String\\
+        - categoryId : int\\
+        - status : BookStatus\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getAccessionId() : String\\
+        + getStatus() : BookStatus
+    };
+    
+    % Transaction Entity
+    \node[classbox, text width=4.5cm, below=1.0cm of book] (tx) {
+        \textbf{\centerline{BorrowTransaction}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - id : int\\
+        - studentId : String\\
+        - bookId : String\\
+        - librarianId : int\\
+        - issueDate : LocalDate\\
+        - dueDate : LocalDate\\
+        - returnDate : LocalDate\\
+        - fine : BigDecimal\\
+        - status : String\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getDueDate() : LocalDate\\
+        + getFine() : BigDecimal
+    };
+    
+    \draw[dashed, ->] (tx.north) -- (book.south) node[midway, right] {references};
+    \draw[dashed, ->] (tx.west) -- (student.east) node[midway, above] {borrowed by};
+\end{tikzpicture}
+\caption{UML Class Diagram of Core Domain Entities}
+\label{fig:class_diagram}
+\end{figure}
+
+\section{Class Descriptions, Attributes, and Methods}
+
+\subsection{Domain Models (\texttt{com.college.library.model} and \texttt{dto})}
+\begin{longtable}{p{3.2cm}p{4.2cm}p{6.8cm}}
+\caption{Domain Model Class Specifications} \label{tab:models_spec} \\
+\toprule
+\textbf{Class Name} & \textbf{Attributes} & \textbf{Methods and Responsibilities} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Class Name} & \textbf{Attributes} & \textbf{Methods and Responsibilities} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{Person} (abstract) & \texttt{id}, \texttt{name} & Base entity encapsulating common human identity attributes. \\
+\midrule
+\texttt{Librarian} & \texttt{id}, \texttt{username}, \texttt{passwordHash}, \texttt{name} & Extends \texttt{Person}. Represents administrative users with circulation privileges. \\
+\midrule
+\texttt{Student} & \texttt{ktuId}, \texttt{passwordHash}, \texttt{name}, \texttt{branch}, \texttt{semester}, \texttt{batch}, \texttt{email}, \texttt{phone}, \texttt{status} & Extends \texttt{Person}. Represents institutional student patrons with KTU identifiers. \\
+\midrule
+\texttt{Book} & \texttt{accessionId}, \texttt{isbn}, \texttt{title}, \texttt{author}, \texttt{categoryId}, \texttt{status} & Represents individual physical catalog copies. Encapsulates status enumerations (\texttt{AVAILABLE}, \texttt{ISSUED}, etc.). \\
+\midrule
+\texttt{Category} & \texttt{id}, \texttt{name} & Academic subject categorization taxonomy (e.g., Computer Science, Mathematics). \\
+\midrule
+\texttt{BorrowTransaction} & \texttt{id}, \texttt{studentId}, \texttt{bookId}, \texttt{librarianId}, \texttt{issueDate}, \texttt{dueDate}, \texttt{returnDate}, \texttt{fine}, \texttt{status} & Represents physical loan agreements, tracking critical due dates and financial liabilities. \\
+\midrule
+\texttt{Reservation} & \texttt{id}, \texttt{studentId}, \texttt{bookIsbn}, \texttt{requestDate}, \texttt{status} & Models FIFO reservation queues for titles checked out by other patrons. \\
+\midrule
+\texttt{BorrowRequest} & \texttt{id}, \texttt{studentId}, \texttt{bookId}, \texttt{requestDate}, \texttt{status} & Models online book issue requests submitted from student dashboards. \\
+\midrule
+\texttt{ActiveBorrowingDTO} & 10 fields: \texttt{txId}, \texttt{bookId}, \texttt{title}, \texttt{author}, \texttt{studentId}, \texttt{studentName}, \texttt{issueDate}, \texttt{dueDate}, \texttt{daysOverdue}, \texttt{currentFine} & Immutable Data Transfer Object designed to carry aggregated active loan details directly to the circulation table. \\
+\end{longtable}
+
+\subsection{Business Services (\texttt{com.college.library.service})}
+\begin{longtable}{p{3.5cm}p{4cm}p{6.8cm}}
+\caption{Business Service Layer Class Specifications} \label{tab:services_spec} \\
+\toprule
+\textbf{Service Name} & \textbf{DAO Dependencies} & \textbf{Core Methods and Responsibilities} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Service Name} & \textbf{DAO Dependencies} & \textbf{Core Methods and Responsibilities} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{AuthService} & \texttt{LibrarianDAO}, \texttt{StudentDAO} & \texttt{loginLibrarian()}, \texttt{loginStudent()}, \texttt{registerStudent()}. Manages BCrypt validation and role identification. \\
+\midrule
+\texttt{BookService} & \texttt{BookDAO} & \texttt{addBook()}, \texttt{updateBook()}, \texttt{deleteBook()}, \texttt{searchBooks()}. Enforces catalog rules and unique accession constraints. \\
+\midrule
+\texttt{StudentService} & \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO} & \texttt{registerStudent()}, \texttt{updateStudent()}, \texttt{getStudentDues()}, \texttt{verifyClearance()}. Computes academic clearances and outstanding debts. \\
+\midrule
+\texttt{BorrowService} & \texttt{BorrowTransactionDAO}, \texttt{BookDAO}, \texttt{StudentDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO} & \texttt{issueBook()}, \texttt{returnBook()}, \texttt{getAllActiveBorrowings()}, \texttt{calculateOverdueFine()}. Core circulation engine with clock-aware fine computation and reservation triggers. \\
+\midrule
+\texttt{ReservationService} & \texttt{ReservationDAO}, \texttt{StudentDAO}, \texttt{BookDAO} & \texttt{createReservation()}, \texttt{cancelReservation()}, \texttt{fulfillReservation()}. Manages FIFO reservation lifecycle. \\
+\midrule
+\texttt{AnalyticsService} & \texttt{BookDAO}, \texttt{StudentDAO}, \texttt{BorrowTransactionDAO} & \texttt{getTotalBooks()}, \texttt{getActiveLoansCount()}, \texttt{getOverdueCount()}, \texttt{getPopularBooks()}. Aggregates executive dashboard metrics. \\
+\end{longtable}
+
+\subsection{Data Access Layer (\texttt{com.college.library.dao} and \texttt{dao.impl})}
+\begin{longtable}{p{3.2cm}p{3.8cm}p{7.3cm}}
+\caption{Data Access Layer Specifications} \label{tab:dao_spec} \\
+\toprule
+\textbf{Interface / Impl} & \textbf{Generic Base} & \textbf{Key Query Methods} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Interface / Impl} & \textbf{Generic Base} & \textbf{Key Query Methods} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{CrudDAO<T, ID>} & N/A & \texttt{save(T)}, \texttt{findById(ID)}, \texttt{findAll()}, \texttt{update(T)}, \texttt{delete(ID)}. Generic CRUD contract. \\
+\midrule
+\texttt{BookDAO} / \texttt{Impl} & \texttt{CrudDAO<Book, String>} & \texttt{findByIsbn()}, \texttt{search()}, \texttt{updateStatus()}, \texttt{getPopularBooks()}. Manages accession inventory. \\
+\midrule
+\texttt{StudentDAO} / \texttt{Impl} & \texttt{CrudDAO<Student, String>} & \texttt{findByKtuId()}, \texttt{updatePassword()}, \texttt{countActiveStudents()}. \\
+\midrule
+\texttt{BorrowTransactionDAO} / \texttt{Impl} & \texttt{CrudDAO<BorrowTransaction, Integer>} & \texttt{findActiveByStudentId()}, \texttt{findActiveByBookId()}, \texttt{findAllActiveTransactionsWithDetails()}, \texttt{closeTransaction()}. \\
+\midrule
+\texttt{ReservationDAO} / \texttt{Impl} & \texttt{CrudDAO<Reservation, Integer>} & \texttt{findEarliestPendingByIsbn()}, \texttt{findByStudentId()}, \texttt{updateStatus()}. \\
+\midrule
+\texttt{BorrowRequestDAO} / \texttt{Impl} & \texttt{CrudDAO<BorrowRequest, Integer>} & \texttt{findPendingByStudentId()}, \texttt{updateStatus()}. \\
+\end{longtable}
+
+\section{Relationships Between Classes}
+SmartLib demonstrates the primary object-oriented relationships:
+\begin{itemize}
+    \item \textbf{Generalization (Inheritance):} Both \texttt{Student} and \texttt{Librarian} inherit from the abstract base class \texttt{Person}, reusing common identity properties (\texttt{id}, \texttt{name}) while specializing with domain-specific attributes.
+    \item \textbf{Realization (Interface Implementation):} Concrete classes in \texttt{dao.impl} (\texttt{BookDAOImpl}, \texttt{StudentDAOImpl}, etc.) realize specific contracts extending \texttt{CrudDAO<T, ID>}. This enables dynamic polymorphism and seamless test stubbing.
+    \item \textbf{Composition and Aggregation:}
+    \begin{itemize}
+        \item \texttt{MainApplication} composes the application's view panels and coordinates their lifecycle.
+        \item Business services compose DAO interface references via constructor injection, guaranteeing that service logic is independent of persistence implementations.
+    \end{itemize}
+    \item \textbf{Association and Dependency:}
+    \begin{itemize}
+        \item \texttt{BorrowService} depends upon \texttt{ActiveBorrowingDTO} to assemble combined tabular data from multiple underlying entities.
+        \item GUI panels depend on business services to invoke transactional workflows upon user events.
+    \end{itemize}
+\end{itemize}
+
+\section{Database Design}
+
+\subsection{Entity-Relationship (ER) Diagram}
+The persistence tier comprises 7 normalized tables managing user profiles, physical book copies, loans, and reservation pipelines.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    dbtable/.style={rectangle, draw=black!70, fill=gray!8, rounded corners=2pt, font=\scriptsize, align=left, inner sep=6pt},
+    arrow/.style={->, >=stealth, thick, color=black!80}
+]
+    % Categories
+    \node[dbtable, text width=3.8cm] (categories) {
+        \textbf{\centerline{categories}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{id} : INT [PK, AI]\\
+        name : VARCHAR(100) [UQ]
+    };
+    
+    % Books
+    \node[dbtable, text width=4.5cm, right=1.5cm of categories] (books) {
+        \textbf{\centerline{books}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{accession\_id} : VARCHAR(20) [PK]\\
+        isbn : VARCHAR(20)\\
+        title : VARCHAR(255)\\
+        author : VARCHAR(255)\\
+        category\_id : INT [FK]\\
+        status : ENUM(...)
+    };
+    
+    % Students
+    \node[dbtable, text width=4.5cm, below=1.5cm of categories] (students) {
+        \textbf{\centerline{students}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{ktu\_id} : VARCHAR(20) [PK]\\
+        password\_hash : VARCHAR(255)\\
+        name : VARCHAR(100)\\
+        branch : VARCHAR(50)\\
+        semester : INT\\
+        batch : VARCHAR(10)\\
+        email : VARCHAR(100)\\
+        phone : VARCHAR(20)\\
+        status : VARCHAR(20)
+    };
+    
+    % Librarians
+    \node[dbtable, text width=4.2cm, below=1.5cm of books] (librarians) {
+        \textbf{\centerline{librarians}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{id} : INT [PK, AI]\\
+        username : VARCHAR(50) [UQ]\\
+        password\_hash : VARCHAR(255)\\
+        name : VARCHAR(100)
+    };
+    
+    % Borrow Transactions
+    \node[dbtable, text width=5.2cm, below=1.2cm of students] (tx) {
+        \textbf{\centerline{borrow\_transactions}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{id} : INT [PK, AI]\\
+        student\_id : VARCHAR(20) [FK]\\
+        book\_id : VARCHAR(20) [FK]\\
+        librarian\_id : INT [FK]\\
+        issue\_date : DATE\\
+        due\_date : DATE\\
+        return\_date : DATE\\
+        fine : DECIMAL(10,2)\\
+        status : ENUM('ACTIVE', 'COMPLETED')
+    };
+    
+    % Foreign Key Connections
+    \draw[arrow] (books.west) -- (categories.east) node[midway, above, font=\tiny] {category\_id};
+    \draw[arrow] (tx.north) -- (students.south) node[midway, left, font=\tiny] {student\_id};
+    \draw[arrow] (tx.north east) -- (books.south) node[midway, above, font=\tiny] {book\_id};
+    \draw[arrow] (tx.east) -| (librarians.south) node[midway, below, font=\tiny] {librarian\_id};
+\end{tikzpicture}
+\caption{Entity-Relationship (ER) Diagram of SmartLib Database}
+\label{fig:er_diagram}
+\end{figure}
+
+\subsection{Relational Data Dictionary}
+\begin{enumerate}
+    \item \textbf{\texttt{librarians}:} Stores administrative user credentials. Primary Key: \texttt{id} (Auto-Increment). Unique constraint on \texttt{username}.
+    \item \textbf{\texttt{students}:} Stores student patron profiles. Primary Key: \texttt{ktu\_id} (Registration ID). Contains academic metadata (\texttt{branch}, \texttt{semester}, \texttt{batch}).
+    \item \textbf{\texttt{categories}:} Classification taxonomy for academic literature. Primary Key: \texttt{id}. Unique constraint on \texttt{name}.
+    \item \textbf{\texttt{books}:} Stores physical book inventory. Primary Key: \texttt{accession\_id}. Foreign Key: \texttt{category\_id} references \texttt{categories(id)}. Enumerated status: \texttt{AVAILABLE}, \texttt{ISSUED}, \texttt{LOST}, \texttt{DAMAGED}.
+    \item \textbf{\texttt{borrow\_transactions}:} Circulation records. Primary Key: \texttt{id}. Foreign Keys: \texttt{student\_id} references \texttt{students(ktu\_id)}, \texttt{book\_id} references \texttt{books(accession\_id)}, \texttt{librarian\_id} references \texttt{librarians(id)}.
+    \item \textbf{\texttt{reservations}:} Priority queues. Primary Key: \texttt{id}. Foreign Key: \texttt{student\_id} references \texttt{students(ktu\_id)}. Status: \texttt{PENDING}, \texttt{FULFILLED}, \texttt{CANCELLED}.
+    \item \textbf{\texttt{borrow\_requests}:} Digital borrow requests. Primary Key: \texttt{id}. Foreign Keys: \texttt{student\_id} references \texttt{students(ktu\_id)}, \texttt{book\_id} references \texttt{books(accession\_id)}.
+\end{enumerate}
+
+\subsection{Database Normalization Analysis}
+The relational schema satisfies third normal form (3NF):
+\begin{itemize}
+    \item \textbf{First Normal Form (1NF):} All attributes are atomic and indivisible. There are no repeating groups or multivalued columns.
+    \item \textbf{Second Normal Form (2NF):} The schema is in 1NF and contains no partial functional dependencies; all non-prime attributes are fully functionally dependent on the primary keys.
+    \item \textbf{Third Normal Form (3NF):} The schema is in 2NF and contains zero transitive dependencies. For example, book categories are factored out into an independent \texttt{categories} table rather than storing redundant textual category labels in \texttt{books}.
+\end{itemize}
+
+\subsection{Accession ID vs. ISBN Architectural Distinction}
+A key technical accomplishment in SmartLib is the explicit decoupling of \textbf{Accession ID} and \textbf{ISBN}:
+\begin{itemize}
+    \item \textbf{ISBN (International Standard Book Number):} Identifies the conceptual title, edition, and literary work (e.g., \textit{Effective Java}, \texttt{978-0134685991}).
+    \item \textbf{Accession ID:} Represents the specific, physical barcoded copy on the institutional shelf (e.g., \texttt{B1001}, \texttt{B1002}).
+\end{itemize}
+This distinction permits the library to hold multiple physical copies of the same ISBN while managing reservations across the title level (reserving by ISBN) and issuing loans across the copy level (issuing by Accession ID).
+
+\section{User Interface Design}
+The user interface is built on Java Swing with a centralized presentation controller (\texttt{MainApplication}) utilizing \texttt{CardLayout}.
+
+\subsection{Design System and UITheme Framework}
+All visual styling is maintained in a centralized styling framework (\texttt{UITheme.java}):
+\begin{itemize}
+    \item \textbf{Color Palette:} Professional corporate dark-and-light aesthetic featuring deep slate backgrounds (\texttt{\#F8FAFC}), brand primary indigo (\texttt{\#2563EB}), dark card containers (\texttt{\#FFFFFF}), and high-contrast typography (\texttt{\#0F172A}).
+    \item \textbf{Semantic Status Colors:} Vibrant indicators for operational states: emerald green (\texttt{\#16A34A}) for Available, crimson red (\texttt{\#DC2626}) for Overdue, and amber (\texttt{\#D97706}) for Pending.
+    \item \textbf{Consistent Component Styling:} Utility helper methods (\texttt{createPrimaryButton()}, \texttt{createTextField()}, \texttt{styleTable()}) enforce identical padding, rounded borders, and hover feedback across all 7 screen panels.
+\end{itemize}
+
+\subsection{Custom Table Interaction Engine (\texttt{TableSelectionHelper})}
+In standard Swing \texttt{JTable} implementations, clicking an empty space inside a table retains row selection, causing unintended action triggers. SmartLib incorporates \texttt{TableSelectionHelper.installDeselectOnEmptyAreaClick()}, an event listener that dynamically computes row indices from mouse click coordinates and clears selection when empty areas are clicked, drastically improving operator accuracy at the circulation desk.

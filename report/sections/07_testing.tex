@@ -1,0 +1,126 @@
+\chapter{Testing and Test Cases}
+
+\section{Testing Methodology and Philosophy}
+Software quality assurance in SmartLib follows a rigorous, test-driven unit verification strategy implemented through \textbf{JUnit Jupiter (JUnit 5)}. The testing philosophy focuses on verifying domain business rules, boundary conditions, edge cases, and exception paths in isolation from volatile external dependencies such as the live MySQL database or GUI event loops.
+
+\subsection{Isolation via Mocking and Clock Simulation}
+To ensure automated tests execute deterministically and in milliseconds:
+\begin{enumerate}
+    \item \textbf{Mock DAO Stubs:} Test fixtures instantiate lightweight mock stubs or in-memory implementations of the DAO interfaces (\texttt{BookDAO}, \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, etc.). This isolates business service logic from database network latency and connection state.
+    \item \textbf{Deterministic Temporal Clock Simulation:} Rather than relying on workstation wall-clock time (\texttt{LocalDate.now()}), the circulation test suite utilizes Java's \texttt{Clock.fixed()} to simulate specific calendar dates, allowing overdue fines and deadline thresholds to be verified with 100\% mathematical repeatability.
+\end{enumerate}
+
+\section{Automated Test Suite Overview}
+The automated test suite contains 43 unit tests across 6 dedicated test classes, covering authentication, student operations, book cataloging, and complex borrowing workflows. All 43 tests pass cleanly with zero failures or errors, as summarized in Table~\ref{tab:test_suite_summary}.
+
+\begin{table}[h!]
+    \centering
+    \caption{JUnit 5 Test Suite Execution Summary}
+    \begin{tabular}{llcc}
+        \toprule
+        \textbf{Test Class} & \textbf{Target Service / Subsystem} & \textbf{Tests Run} & \textbf{Result} \\
+        \midrule
+        \texttt{BCryptTest} & Password Hashing \& Verification & 1 & PASS \\
+        \texttt{AuthServiceTest} & Librarian Authentication & 3 & PASS \\
+        \texttt{StudentAuthTest} & Student Auth \& KTU ID Validation & 3 & PASS \\
+        \texttt{BookServiceTest} & Book Cataloging \& Search & 3 & PASS \\
+        \texttt{StudentServiceTest} & Student Management \& Clearances & 18 & PASS \\
+        \texttt{BorrowServiceTest} & Circulation \& Overdue Calculations & 15 & PASS \\
+        \midrule
+        \textbf{Total Test Cases} & & \textbf{43} & \textbf{100\% PASS} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:test_suite_summary}
+\end{table}
+
+\section{Detailed Test Cases and Results}
+
+The tables below provide the exhaustive specification of critical test cases evaluated across the system.
+
+\subsection{Authentication and Cryptography Test Cases}
+\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
+\caption{Authentication and Cryptography Test Cases} \label{tab:test_auth} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-AUT-01} & BCrypt Password Hashing & Password: \texttt{"password123"} & Hashed output starts with \texttt{\$2a\$12\$}; verifies true against input & PASS \\
+\midrule
+\texttt{TC-AUT-02} & Valid Librarian Login & Username: \texttt{"admin"}, Password: \texttt{"password123"} & Returns authenticated \texttt{Librarian} object & PASS \\
+\midrule
+\texttt{TC-AUT-03} & Invalid Librarian Login & Username: \texttt{"admin"}, Password: \texttt{"wrongpass"} & Throws \texttt{LibraryException} ("Invalid credentials") & PASS \\
+\midrule
+\texttt{TC-AUT-04} & Student Registration & KTU ID: \texttt{"TVE23CS001"}, Password: \texttt{"pwd123"} & Student persisted; password hashed; retrievable & PASS \\
+\midrule
+\texttt{TC-AUT-05} & KTU ID Format Validation & \texttt{"TVE25CS002"}, \texttt{"TCR20CS001"}, \texttt{"invalid\_id"} & Regex matches valid IDs; rejects lowercases and malformed formats & PASS \\
+\end{longtable}
+
+\subsection{Borrow and Circulation Desk Test Cases (\texttt{BorrowServiceTest})}
+\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
+\caption{Circulation and Borrowing Test Cases} \label{tab:test_borrow} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-BOR-01} & Direct Book Issue Success & Student: \texttt{"VALID\_STU"}, Book: \texttt{"B1001"} (Available) & Transaction created; due date set to $+14$ days; book status $\to$ \texttt{ISSUED} & PASS \\
+\midrule
+\texttt{TC-BOR-02} & Issue Already Issued Book & Book: \texttt{"B1003"} (Status \texttt{ISSUED}) & Throws \texttt{LibraryException} ("Book is not available") & PASS \\
+\midrule
+\texttt{TC-BOR-03} & Issue to Inactive Student & Student Status: \texttt{"SUSPENDED"} & Throws \texttt{LibraryException} ("Student is not active") & PASS \\
+\midrule
+\texttt{TC-BOR-04} & Return Book On-Time & Due Date: Today, Return: Today & Status $\to$ \texttt{COMPLETED}; Fine = $\text{\rupee} 0.00$; Book status $\to$ \texttt{AVAILABLE} & PASS \\
+\midrule
+\texttt{TC-BOR-05} & Return Overdue Book (2 days) & Due: 2 days ago, Rate: $\text{\rupee} 10$/day & Status $\to$ \texttt{COMPLETED}; Assessed Fine = $\text{\rupee} 20.00$ & PASS \\
+\midrule
+\texttt{TC-BOR-06} & Active Borrowings Live Query & Single active overdue loan in DB & Returns 10-column DTO with calculated fine $\text{\rupee} 20.00$ & PASS \\
+\midrule
+\texttt{TC-BOR-07} & Filter: Overdue Loans & Mixed active list (due in future \& overdue) & Returns only records where \texttt{daysOverdue} $> 0$ & PASS \\
+\midrule
+\texttt{TC-BOR-08} & Filter: Due Today & Mixed active list & Returns only records where \texttt{dueDate} equals simulated today & PASS \\
+\midrule
+\texttt{TC-BOR-09} & Search Active Borrowings & Search term: student name substring & Returns matching active records & PASS \\
+\midrule
+\texttt{TC-BOR-10} & Return with Reservation & Book returned has pending reservation & Reservation marked \texttt{FULFILLED}; returns true flag to alert GUI & PASS \\
+\end{longtable}
+
+\subsection{Student Service and Clearance Test Cases (\texttt{StudentServiceTest})}
+\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
+\caption{Student Management and Clearance Test Cases} \label{tab:test_student} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{c}%
+{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-STU-01} & Register Valid Student & Valid KTU ID, name, batch & Student record saved in database & PASS \\
+\midrule
+\texttt{TC-STU-02} & Duplicate KTU ID Rejection & Existing KTU ID: \texttt{"TVE23CS001"} & Throws \texttt{LibraryException} ("KTU ID already exists") & PASS \\
+\midrule
+\texttt{TC-STU-03} & Student Clearance Eligible & No active loans, No unpaid fines & Clearance verified successfully (\texttt{true}) & PASS \\
+\midrule
+\texttt{TC-STU-04} & Clearance Blocked (Active Loan) & Student has 1 unreturned book & Clearance rejected (\texttt{false}); lists loaned book ID & PASS \\
+\midrule
+\texttt{TC-STU-05} & Clearance Blocked (Unpaid Fine) & Student has unreturned book with fine & Clearance rejected (\texttt{false}); displays total debt & PASS \\
+\end{longtable}
