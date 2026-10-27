@@ -82,7 +82,7 @@ The functional requirements specify the actions, operations, and behaviors that 
     \item \textbf{Reliability, Maintainability, and Testability:}
     \begin{itemize}
         \item Adherence to SOLID principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
-        \item High automated test coverage with JUnit 5, isolating business logic via mock DAOs and temporal clock injection.
+        \item Thorough functional test coverage through systematic manual UI testing across all user interaction flows and edge cases.
     \end{itemize}
 \end{enumerate}
 
@@ -118,7 +118,7 @@ The functional requirements specify the actions, operations, and behaviors that 
         GUI Framework & Java Swing \& AWT & Native standard library (\texttt{javax.swing}) \\
         Database Engine & MySQL Community Server & Version 8.0 or higher \\
         Build \& Dependency Tool & Apache Maven & Version 3.8+ (Maven Wrapper \texttt{mvnw} bundled) \\
-        Testing Framework & JUnit Jupiter (JUnit 5) & Version 5.10.0 \\
+        Testing Approach & Manual Functional UI Testing & Black-box scenario testing via Java Swing interface \\
         JDBC Driver & MySQL Connector/J & \texttt{com.mysql:mysql-connector-j:9.4.0} \\
         Security Library & jBCrypt & \texttt{org.mindrot:jbcrypt:0.4} \\
         Operating System & Cross-Platform & Linux (Ubuntu 22.04/24.04), Windows 10/11 \\

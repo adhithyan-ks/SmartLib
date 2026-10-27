@@ -48,10 +48,10 @@ To resolve these challenges, this report presents \textbf{SmartLib}, a robust, d
 
 SmartLib introduces innovative operational features that elevate collegiate library administration. A unified authentication mechanism with 12-round BCrypt cryptographic password hashing provides role-based access control for both Librarians and Students. Librarians benefit from an advanced Circulation Desk equipped with real-time Active Borrowings Management, which provides a live 10-column inventory of active loans, dynamic clock-aware overdue calculations ($\text{Fine} = \text{Days Overdue} \times \text{\rupee} 10$), multi-criteria instant filtering, and single-click return processing. An automated Title Reservation subsystem eliminates concurrency conflicts through a First-In, First-Out (FIFO) queue that proactively triggers fulfillment notifications upon book returns. Concurrently, students are empowered through a dedicated self-service portal featuring catalog exploration, borrowing requests, and real-time fine visibility. 
 
-The software system was verified through an automated test suite comprising 43 unit test cases implemented in JUnit 5, employing mock DAOs and deterministic clock abstractions to guarantee rock-solid business logic integrity. The resulting application delivers an intuitive, secure, and production-grade library automation solution that demonstrates the practical application of object-oriented paradigms to enterprise software development.
+The software system was thoroughly verified through comprehensive manual functional testing conducted across all user interface panels, ensuring reliable operation of authentication, catalog management, circulation workflows, active borrowing tracking, and reservation queues. The resulting application delivers an intuitive, secure, and production-grade library automation solution that demonstrates the practical application of object-oriented paradigms to enterprise software development.
 
 \vspace*{1cm}
-\noindent \textbf{Keywords:} Object-Oriented Programming, Multi-Tier Architecture, Java Swing, JDBC, Data Access Object Pattern, BCrypt Authentication, Active Borrowings Tracking, JUnit 5 Testing.
+\noindent \textbf{Keywords:} Object-Oriented Programming, Multi-Tier Architecture, Java Swing, JDBC, Data Access Object Pattern, BCrypt Authentication, Active Borrowings Tracking, Manual Functional Testing.
 
 \newpage
 

@@ -6,7 +6,7 @@ In academic institutions affiliated with APJ Abdul Kalam Technological Universit
     \item \textbf{Circulation Desk Opacity:} Librarians lack real-time computational oversight of currently loaned books, which makes calculating overdue days and accrued fines tedious, error-prone, and inconsistent.
     \item \textbf{Data Inconsistency and Concurrency Anomalies:} Without strict relational constraints and database-level transaction locking, concurrent operations (such as attempting to issue an already loaned book or reserving a title without checking active inventory) create corrupt data states.
     \item \textbf{Inadequate Security and Access Control:} Many departmental library systems store passwords in plain text or lack clear separation between administrative privileges and student viewing rights.
-    \item \textbf{Architectural Fragility:} Codebases that mix database SQL queries directly inside GUI event listeners violate the Single Responsibility Principle (SRP) and Dependency Inversion Principle (DIP), making code maintenance, feature enhancement, and unit testing virtually impossible.
+    \item \textbf{Architectural Fragility:} Codebases that mix database SQL queries directly inside GUI event listeners violate the Single Responsibility Principle (SRP) and Dependency Inversion Principle (DIP), making code maintenance, feature enhancement, and systematic software testing virtually impossible.
 \end{enumerate}
 
 Therefore, the core engineering challenge is to design, implement, and rigorously test a multi-tier, object-oriented desktop library management system that provides synchronized, role-based workflows for librarians and students, enforces database integrity, computes overdue fines dynamically, and adheres strictly to industry-standard design patterns.
@@ -32,6 +32,6 @@ To address the defined problem statement, the SmartLib project was structured ar
 
 \subsection{Quality and Verification Objectives}
 \begin{itemize}
-    \item \textbf{Automated Unit Testing:} Construct a comprehensive suite of automated unit tests using JUnit 5, validating domain services against mock DAO stubs and simulated temporal clocks without requiring an active external database connection.
+    \item \textbf{Comprehensive Functional Testing:} Conduct structured manual black-box functional testing through the graphical user interface, validating all user workflows, boundary validations, role-based permissions, and business rules against the live database.
     \item \textbf{Industrial Ergonomics:} Build a professional, polished Java Swing user interface utilizing a cohesive design theme (\texttt{UITheme}), clean typography, card layout navigation, and custom table selection managers.
 \end{itemize}

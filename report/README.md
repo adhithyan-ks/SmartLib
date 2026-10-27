@@ -39,7 +39,7 @@ report/
     ├── 04_requirements.tex        # 8. Requirements Specification (FR, NFR, Environment)
     ├── 05_system_design.tex       # 9. System Design (Architecture, Class Diagram, ER, UI)
     ├── 06_implementation.tex      # 10. Implementation & Core OOP Principles
-    ├── 07_testing.tex             # 11. Testing & Test Cases (43 JUnit 5 tests)
+    ├── 07_testing.tex             # 11. Testing & Test Cases (Manual Functional Testing)
     ├── 08_results.tex             # 12. Results, Screenshots & Execution Traces
     ├── 09_conclusion.tex          # 13. Conclusion & Future Enhancements
     └── 10_appendices.tex          # 15. Appendices (User Manual & Source Code)
@@ -92,7 +92,7 @@ The output PDF will be generated as `main.pdf`.
 | **8** | Requirements Specification | `sections/04_requirements.tex` |
 | **9** | System Design (Architecture, Classes, ER, UI) | `sections/05_system_design.tex` |
 | **10** | Implementation (OOP concepts, JDBC, Algorithms) | `sections/06_implementation.tex` |
-| **11** | Testing & Test Cases (43 unit tests) | `sections/07_testing.tex` |
+| **11** | Testing & Test Cases (Manual UI Testing) | `sections/07_testing.tex` |
 | **12** | Results (Screenshots, Traces, Summaries) | `sections/08_results.tex` |
 | **13** | Conclusion & Future Enhancements | `sections/09_conclusion.tex` |
 | **14** | References | `references.bib` via `main.tex` |

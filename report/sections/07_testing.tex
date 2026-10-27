@@ -1,126 +1,276 @@
 \chapter{Testing and Test Cases}
 
-\section{Testing Methodology and Philosophy}
-Software quality assurance in SmartLib follows a rigorous, test-driven unit verification strategy implemented through \textbf{JUnit Jupiter (JUnit 5)}. The testing philosophy focuses on verifying domain business rules, boundary conditions, edge cases, and exception paths in isolation from volatile external dependencies such as the live MySQL database or GUI event loops.
+\section{Manual Functional Testing Strategy}
+Quality assurance for SmartLib was conducted through systematic \textbf{Black-Box Manual Functional Testing} performed directly through the application's Graphical User Interface (GUI). As beginner Java and Object-Oriented Programming students, our team validated the application by interacting with every screen exactly as end-users (librarians and students) would: typing inputs into text fields, choosing options from dropdown combo boxes, clicking action buttons, confirming modal dialogs, and verifying on-screen results.
 
-\subsection{Isolation via Mocking and Clock Simulation}
-To ensure automated tests execute deterministically and in milliseconds:
+\subsection{Testing Approach and Methodology}
+The manual testing procedure followed a structured, repeatable sequence:
 \begin{enumerate}
-    \item \textbf{Mock DAO Stubs:} Test fixtures instantiate lightweight mock stubs or in-memory implementations of the DAO interfaces (\texttt{BookDAO}, \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, etc.). This isolates business service logic from database network latency and connection state.
-    \item \textbf{Deterministic Temporal Clock Simulation:} Rather than relying on workstation wall-clock time (\texttt{LocalDate.now()}), the circulation test suite utilizes Java's \texttt{Clock.fixed()} to simulate specific calendar dates, allowing overdue fines and deadline thresholds to be verified with 100\% mathematical repeatability.
+    \item \textbf{Action Execution:} Perform specific user interactions on the active Swing panels (e.g., submitting credentials on the login screen, registering a book, issuing a physical copy, or filtering tables).
+    \item \textbf{UI Feedback Verification:} Observe and verify the visual feedback presented by the application, including informational message dialogs (\texttt{JOptionPane.showMessageDialog}), error alerts, and field-clearing behaviors.
+    \item \textbf{State and Data Verification:} Confirm that table models (\texttt{JTable}) refresh immediately with updated records, that status badges reflect the correct state (e.g., \texttt{AVAILABLE} $\to$ \texttt{ISSUED}), and that dynamic calculations (such as days overdue and late fines) display accurate mathematical values.
+    \item \textbf{Database Persistence Check:} Verify that completed transactions, new registrations, and status updates persist reliably in the underlying MySQL database across session logouts and application restarts.
 \end{enumerate}
 
-\section{Automated Test Suite Overview}
-The automated test suite contains 43 unit tests across 6 dedicated test classes, covering authentication, student operations, book cataloging, and complex borrowing workflows. All 43 tests pass cleanly with zero failures or errors, as summarized in Table~\ref{tab:test_suite_summary}.
+\subsection{Test Environment}
+All manual test cases were executed in the following local environment:
+\begin{itemize}
+    \item \textbf{Operating System:} Linux (Ubuntu 24.04 LTS) / Windows 11
+    \item \textbf{Java Runtime:} OpenJDK 17 LTS (Java SE 17)
+    \item \textbf{Database:} MySQL Community Server 8.0 running locally on port \texttt{3306}
+    \item \textbf{Initial Data State:} Populated with institutional seed records from \texttt{sample\_data.sql} (default librarian \texttt{admin}, sample books \texttt{B1001}--\texttt{B1003}, and enrolled students \texttt{TVE23CS001} and \texttt{TVE23CS002})
+\end{itemize}
+
+\section{Manual UI Test Cases and Execution Results}
+
+The test cases below document the functional scenarios tested through the application interface. For complete transparency, features fully verified through the UI are marked as \textbf{PASS}, while features not implemented as dedicated UI controls are explicitly marked as \textbf{NOT TESTED}.
+
+\subsection{User Authentication and Login Portal (\texttt{LoginPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Authentication and Login Test Cases} \label{tab:test_ui_auth} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-01} & Librarian Valid Login & Username: \texttt{admin}, Password: \texttt{password123}, click Sign In & Navigates to Librarian Dashboard & Logged in successfully; Dashboard opened & PASS \\
+\midrule
+\texttt{TC-UI-02} & Librarian Bad Password & Username: \texttt{admin}, Password: \texttt{wrongpass}, click Sign In & Error alert ``Invalid credentials''; fields cleared & Error alert displayed; fields cleared & PASS \\
+\midrule
+\texttt{TC-UI-03} & Student Valid Login & KTU ID: \texttt{TVE23CS001}, Password: \texttt{password123}, click Sign In & Navigates to Student Dashboard & Logged in successfully; Portal opened & PASS \\
+\midrule
+\texttt{TC-UI-04} & Student Bad KTU ID & Enter lowercase \texttt{tve23cs001} or short \texttt{12345} & Error alert ``Invalid KTU ID format.'' & Error alert displayed; login blocked & PASS \\
+\midrule
+\texttt{TC-UI-05} & Unregistered Student & Enter valid format but non-existent \texttt{TVE23CS999} & Alert ``Account not found or unregistered.'' & Alert displayed as expected & PASS \\
+\midrule
+\texttt{TC-UI-06} & Blank Inputs & Leave username or password blank and click Sign In & Error alert ``Please enter both username and password.'' & Alert displayed; form submission halted & PASS \\
+\end{longtable}
+
+\subsection{Student Registration and Input Validation (\texttt{LoginPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Student Registration Test Cases} \label{tab:test_ui_reg} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-07} & Valid Registration & Fill registration modal with new KTU ID \texttt{TVE23CS005}, Name, Passwords, click OK & Success alert; KTU ID pre-filled on login screen & Registered successfully; pre-filled on login & PASS \\
+\midrule
+\texttt{TC-UI-08} & Password Mismatch & Fill registration form with mismatched passwords & Error alert ``Passwords do not match.'' & Alert displayed; registration rejected & PASS \\
+\midrule
+\texttt{TC-UI-09} & Duplicate KTU ID & Attempt to register with existing ID \texttt{TVE23CS001} & Error alert indicating student already exists & Error alert displayed; duplicate rejected & PASS \\
+\midrule
+\texttt{TC-UI-10} & Auto-Field Derivation & Type \texttt{TVE23CS005} in KTU ID field in registration form & Batch auto-sets to \texttt{2023-2027}; Branch auto-sets to \texttt{CSE} & Fields auto-selected accurately from KTU ID & PASS \\
+\end{longtable}
+
+\subsection{Book Inventory Management (\texttt{BookPanel} and \texttt{StudentDashboardPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Book Inventory Test Cases} \label{tab:test_ui_books} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-11} & View Catalog & Click ``Book Management'' from Dashboard & Table displays all books with Accession ID, Title, Status & Table populated with all catalog records & PASS \\
+\midrule
+\texttt{TC-UI-12} & Add New Book & Click ``Add New Book'', enter ID \texttt{B1004}, ISBN, Title, Author, Category & Success alert ``Book added successfully!''; table refreshes & New book visible in catalog with status \texttt{AVAILABLE} & PASS \\
+\midrule
+\texttt{TC-UI-13} & Duplicate Book ID & Attempt to add book with existing ID \texttt{B1001} & Error alert indicating duplicate accession ID & Error alert displayed; duplicate blocked & PASS \\
+\midrule
+\texttt{TC-UI-14} & Search Books & In Student Portal, enter keyword ``Java'' and click Search & Table filters to display matching title \textit{Effective Java} & Matching title displayed with copy availability & PASS \\
+\midrule
+\texttt{TC-UI-15} & Delete Unissued Book & Select newly added unissued book row, click ``Delete Book'', confirm & Confirmation prompt; book deleted and removed from table & Book deleted and removed from catalog & PASS \\
+\midrule
+\texttt{TC-UI-16} & Delete Issued Book & Select book \texttt{B1003} (status \texttt{ISSUED}), click ``Delete Book'' & Deletion rejected to protect active circulation records & Error alert displayed; deletion prevented & PASS \\
+\midrule
+\texttt{TC-UI-17} & In-Place Book Edit & Edit existing book details in-place via UI modal & (Not implemented in UI; updates require catalog re-entry) & Dedicated UI edit button not present & NOT TESTED \\
+\end{longtable}
+
+\subsection{Circulation Desk: Book Issue and Return (\texttt{BorrowPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Book Issue and Return Test Cases} \label{tab:test_ui_circ} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-18} & Direct Book Issue & Student: \texttt{TVE23CS001}, Book: \texttt{B1001}, click Issue Book & Success alert ``Book successfully issued!''; status $\to$ \texttt{ISSUED} & Book issued; added to Active Borrowings & PASS \\
+\midrule
+\texttt{TC-UI-19} & Issue Issued Book & Attempt to issue book \texttt{B1003} (already \texttt{ISSUED}) & Error alert ``Book is currently unavailable (ISSUED).'' & Error alert displayed; loan blocked & PASS \\
+\midrule
+\texttt{TC-UI-20} & Issue to Bad Student & Enter invalid student \texttt{TVE23CS999} and available book & Error alert ``Student not found.'' displayed & Error alert displayed; issue rejected & PASS \\
+\midrule
+\texttt{TC-UI-21} & Direct Book Return & Enter Accession ID \texttt{B1001} in Return card, click Return Book & Success alert; book status resets to \texttt{AVAILABLE} & Book returned; status reset to \texttt{AVAILABLE} & PASS \\
+\midrule
+\texttt{TC-UI-22} & Return from Table & Select active loan row in table, click ``Return Selected Book'' & Auto-populates ID; return processed; row removed & Return processed cleanly; table refreshed & PASS \\
+\end{longtable}
+
+\subsection{Active Borrowings Oversight and Overdue Fine Tracking (\texttt{BorrowPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Active Borrowings Oversight Test Cases} \label{tab:test_ui_active} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-23} & 10-Column Display & Open Circulation Desk view & Table displays 10 columns: Tx ID, Student ID, Due Date, Fine, etc. & All 10 columns populated with active loans & PASS \\
+\midrule
+\texttt{TC-UI-24} & Filter: All Active & Select ``All Active'' from Filter dropdown & Displays all currently loaned physical volumes & All active loans displayed & PASS \\
+\midrule
+\texttt{TC-UI-25} & Filter: Overdue & Select ``Overdue'' from Filter dropdown & Displays only loans where due date has passed with overdue fine & Only overdue loans shown with fine at \rupee 10/day & PASS \\
+\midrule
+\texttt{TC-UI-26} & Filter: Due Today & Select ``Due Today'' from Filter dropdown & Displays loans whose deadline is the current calendar day & Table filtered accurately & PASS \\
+\midrule
+\texttt{TC-UI-27} & Live Table Search & Type student name or book ID into active search text field & Table dynamically filters rows matching typed text & Real-time filtering functions as expected & PASS \\
+\end{longtable}
+
+\subsection{Student Borrow Requests Management (\texttt{StudentDashboardPanel} and \texttt{BorrowPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Borrow Request Test Cases} \label{tab:test_ui_req} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-28} & Submit Request & In Student Portal, select available book, click ``Request Borrow'' & Success alert; appears in ``My Requests'' table with status \texttt{PENDING} & Request created; visible as \texttt{PENDING} & PASS \\
+\midrule
+\texttt{TC-UI-29} & Request Issued Book & In Student Portal, select book with 0 available copies, click Request & Info alert: ``Book unavailable. Please use reservation feature.'' & Request blocked; guidance message displayed & PASS \\
+\midrule
+\texttt{TC-UI-30} & Approve Request & In Circulation Desk, select pending request, click ``Approve Request'' & Success alert; request approved; book issued to student & Request approved; active loan created & PASS \\
+\midrule
+\texttt{TC-UI-31} & Reject Request & In Circulation Desk, select pending request, click ``Reject Request'' & Success alert ``Request rejected.''; removed from pending list & Request rejected successfully & PASS \\
+\end{longtable}
+
+\subsection{Title Reservation Queue and Fulfillment (\texttt{ReservationPanel} and \texttt{BorrowPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Title Reservation Test Cases} \label{tab:test_ui_res} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-32} & Place Reservation & In Reservation Desk, enter Student ID and checked-out ISBN, click Reserve & Success alert; reservation added to Queue with position number & Reservation queued with position assigned & PASS \\
+\midrule
+\texttt{TC-UI-33} & Return Alert Trigger & At Circulation Desk, return book \texttt{B1003} having pending reservation & Return succeeds and alerts librarian: ``Pending reservation fulfilled...'' & Alert dialog displayed; reservation fulfilled & PASS \\
+\midrule
+\texttt{TC-UI-34} & Fulfil from Desk & In Reservation Desk, select pending reservation, click ``Fulfil Selected'' & Success alert; book allocated to student; status $\to$ \texttt{FULFILLED} & Reservation fulfilled successfully & PASS \\
+\end{longtable}
+
+\subsection{Student Directory and Account Management (\texttt{StudentPanel})}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Student Directory Test Cases} \label{tab:test_ui_stu} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-35} & View Directory & Navigate to Student Directory from Dashboard & Table displays all enrolled students with KTU ID, Batch, Status & Student directory displayed accurately & PASS \\
+\midrule
+\texttt{TC-UI-36} & Deactivate Student & Select active student, click ``Deactivate Student'' & Status updates to \texttt{INACTIVE}; button label toggles & Student deactivated successfully & PASS \\
+\midrule
+\texttt{TC-UI-37} & Loan Inactive Block & Attempt to issue book to deactivated student at Circulation Desk & Error alert ``Student account is not active.'' & Loan prevented by validation check & PASS \\
+\midrule
+\texttt{TC-UI-38} & Delete Safeguard & Select student with active/past loan history, click ``Delete Student'' & Deletion rejected with notice to deactivate rather than delete & Deletion blocked; history preserved & PASS \\
+\end{longtable}
+
+\subsection{Student Personal Dues and Clearance Oversight}
+\begin{longtable}{p{1.2cm}p{2.3cm}p{3.2cm}p{3.3cm}p{3.3cm}p{1.0cm}}
+\caption{Student Dues and Clearance Test Cases} \label{tab:test_ui_dues} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{{\bfseries Table \thetable\ continued from previous page}} \\
+\toprule
+\textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{TC-UI-39} & View Personal Dues & Student logs in and checks ``My History \& Issued Books'' card & Displays issued books, due dates, return dates, and fine amounts & Personal loan records and fines visible & PASS \\
+\midrule
+\texttt{TC-UI-40} & One-Click Clearance & Dedicated button to generate formal clearance certificate & (Not implemented as separate UI button; dues inspected via table) & Dedicated UI button not present & NOT TESTED \\
+\end{longtable}
+
+\section{Manual Test Execution Summary}
+Table~\ref{tab:manual_summary} summarizes the manual functional test execution across all modules of the SmartLib desktop application.
 
 \begin{table}[h!]
     \centering
-    \caption{JUnit 5 Test Suite Execution Summary}
-    \begin{tabular}{llcc}
+    \caption{Manual Functional Test Execution Summary}
+    \begin{tabular}{lcccc}
         \toprule
-        \textbf{Test Class} & \textbf{Target Service / Subsystem} & \textbf{Tests Run} & \textbf{Result} \\
+        \textbf{Module / Functional Area} & \textbf{Total Scenarios} & \textbf{Tested} & \textbf{Passed} & \textbf{Pass Rate} \\
         \midrule
-        \texttt{BCryptTest} & Password Hashing \& Verification & 1 & PASS \\
-        \texttt{AuthServiceTest} & Librarian Authentication & 3 & PASS \\
-        \texttt{StudentAuthTest} & Student Auth \& KTU ID Validation & 3 & PASS \\
-        \texttt{BookServiceTest} & Book Cataloging \& Search & 3 & PASS \\
-        \texttt{StudentServiceTest} & Student Management \& Clearances & 18 & PASS \\
-        \texttt{BorrowServiceTest} & Circulation \& Overdue Calculations & 15 & PASS \\
+        User Authentication \& Login & 6 & 6 & 6 & 100\% \\
+        Student Registration \& Validation & 4 & 4 & 4 & 100\% \\
+        Book Inventory Management & 7 & 6 & 6 & 100\% \\
+        Circulation Desk (Issue \& Return) & 5 & 5 & 5 & 100\% \\
+        Active Borrowings \& Fine Engine & 5 & 5 & 5 & 100\% \\
+        Borrow Requests Workflow & 4 & 4 & 4 & 100\% \\
+        Title Reservation Queue & 3 & 3 & 3 & 100\% \\
+        Student Directory \& Safeguards & 4 & 4 & 4 & 100\% \\
+        Student Dues \& Clearance Oversight & 2 & 1 & 1 & 100\% \\
         \midrule
-        \textbf{Total Test Cases} & & \textbf{43} & \textbf{100\% PASS} \\
+        \textbf{Total Manual Test Cases} & \textbf{40} & \textbf{38} & \textbf{38} & \textbf{100\%} \\
         \bottomrule
     \end{tabular}
-    \label{tab:test_suite_summary}
+    \label{tab:manual_summary}
 \end{table}
 
-\section{Detailed Test Cases and Results}
-
-The tables below provide the exhaustive specification of critical test cases evaluated across the system.
-
-\subsection{Authentication and Cryptography Test Cases}
-\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
-\caption{Authentication and Cryptography Test Cases} \label{tab:test_auth} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endfirsthead
-\multicolumn{5}{c}%
-{{\bfseries Table \thetable\ continued from previous page}} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-\texttt{TC-AUT-01} & BCrypt Password Hashing & Password: \texttt{"password123"} & Hashed output starts with \texttt{\$2a\$12\$}; verifies true against input & PASS \\
-\midrule
-\texttt{TC-AUT-02} & Valid Librarian Login & Username: \texttt{"admin"}, Password: \texttt{"password123"} & Returns authenticated \texttt{Librarian} object & PASS \\
-\midrule
-\texttt{TC-AUT-03} & Invalid Librarian Login & Username: \texttt{"admin"}, Password: \texttt{"wrongpass"} & Throws \texttt{LibraryException} ("Invalid credentials") & PASS \\
-\midrule
-\texttt{TC-AUT-04} & Student Registration & KTU ID: \texttt{"TVE23CS001"}, Password: \texttt{"pwd123"} & Student persisted; password hashed; retrievable & PASS \\
-\midrule
-\texttt{TC-AUT-05} & KTU ID Format Validation & \texttt{"TVE25CS002"}, \texttt{"TCR20CS001"}, \texttt{"invalid\_id"} & Regex matches valid IDs; rejects lowercases and malformed formats & PASS \\
-\end{longtable}
-
-\subsection{Borrow and Circulation Desk Test Cases (\texttt{BorrowServiceTest})}
-\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
-\caption{Circulation and Borrowing Test Cases} \label{tab:test_borrow} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endfirsthead
-\multicolumn{5}{c}%
-{{\bfseries Table \thetable\ continued from previous page}} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-\texttt{TC-BOR-01} & Direct Book Issue Success & Student: \texttt{"VALID\_STU"}, Book: \texttt{"B1001"} (Available) & Transaction created; due date set to $+14$ days; book status $\to$ \texttt{ISSUED} & PASS \\
-\midrule
-\texttt{TC-BOR-02} & Issue Already Issued Book & Book: \texttt{"B1003"} (Status \texttt{ISSUED}) & Throws \texttt{LibraryException} ("Book is not available") & PASS \\
-\midrule
-\texttt{TC-BOR-03} & Issue to Inactive Student & Student Status: \texttt{"SUSPENDED"} & Throws \texttt{LibraryException} ("Student is not active") & PASS \\
-\midrule
-\texttt{TC-BOR-04} & Return Book On-Time & Due Date: Today, Return: Today & Status $\to$ \texttt{COMPLETED}; Fine = $\text{\rupee} 0.00$; Book status $\to$ \texttt{AVAILABLE} & PASS \\
-\midrule
-\texttt{TC-BOR-05} & Return Overdue Book (2 days) & Due: 2 days ago, Rate: $\text{\rupee} 10$/day & Status $\to$ \texttt{COMPLETED}; Assessed Fine = $\text{\rupee} 20.00$ & PASS \\
-\midrule
-\texttt{TC-BOR-06} & Active Borrowings Live Query & Single active overdue loan in DB & Returns 10-column DTO with calculated fine $\text{\rupee} 20.00$ & PASS \\
-\midrule
-\texttt{TC-BOR-07} & Filter: Overdue Loans & Mixed active list (due in future \& overdue) & Returns only records where \texttt{daysOverdue} $> 0$ & PASS \\
-\midrule
-\texttt{TC-BOR-08} & Filter: Due Today & Mixed active list & Returns only records where \texttt{dueDate} equals simulated today & PASS \\
-\midrule
-\texttt{TC-BOR-09} & Search Active Borrowings & Search term: student name substring & Returns matching active records & PASS \\
-\midrule
-\texttt{TC-BOR-10} & Return with Reservation & Book returned has pending reservation & Reservation marked \texttt{FULFILLED}; returns true flag to alert GUI & PASS \\
-\end{longtable}
-
-\subsection{Student Service and Clearance Test Cases (\texttt{StudentServiceTest})}
-\begin{longtable}{p{1.5cm}p{3.2cm}p{3.5cm}p{3.5cm}p{1.2cm}}
-\caption{Student Management and Clearance Test Cases} \label{tab:test_student} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endfirsthead
-\multicolumn{5}{c}%
-{{\bfseries Table \thetable\ continued from previous page}} \\
-\toprule
-\textbf{Test ID} & \textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Output} & \textbf{Status} \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-\texttt{TC-STU-01} & Register Valid Student & Valid KTU ID, name, batch & Student record saved in database & PASS \\
-\midrule
-\texttt{TC-STU-02} & Duplicate KTU ID Rejection & Existing KTU ID: \texttt{"TVE23CS001"} & Throws \texttt{LibraryException} ("KTU ID already exists") & PASS \\
-\midrule
-\texttt{TC-STU-03} & Student Clearance Eligible & No active loans, No unpaid fines & Clearance verified successfully (\texttt{true}) & PASS \\
-\midrule
-\texttt{TC-STU-04} & Clearance Blocked (Active Loan) & Student has 1 unreturned book & Clearance rejected (\texttt{false}); lists loaned book ID & PASS \\
-\midrule
-\texttt{TC-STU-05} & Clearance Blocked (Unpaid Fine) & Student has unreturned book with fine & Clearance rejected (\texttt{false}); displays total debt & PASS \\
-\end{longtable}
+\section{Viva Voce Testing Notes and Demonstration Guide}
+During project evaluations and viva voce examinations, our team can directly demonstrate the following practical test workflows:
+\begin{enumerate}
+    \item \textbf{Demonstrating Overdue Fines:} In the live database, sample book \texttt{B1003} is pre-seeded with a past due date (\texttt{2023-10-15}). In the Circulation Desk, selecting the ``Overdue'' filter instantly displays this record with calculated overdue days and fine accumulated at \rupee 10.00 per day.
+    \item \textbf{Demonstrating Input Validation:} Typing lowercase or invalid KTU IDs triggers instant validation alerts, while typing a valid format auto-populates branch and batch.
+    \item \textbf{Demonstrating Reservation Alert:} Returning an issued book with a pending reservation triggers a notification popup instructing the librarian to hold the book for the next student in the queue.
+    \item \textbf{Demonstrating Data Safety:} Attempting to delete a student who has active or historical borrowing records is automatically blocked to preserve institutional audit trails.
+\end{enumerate}

@@ -62,7 +62,7 @@ public class Student extends Person {
 \end{lstlisting}
 
 \subsection{Polymorphism and Dynamic Dispatch}
-Polymorphism is leveraged extensively across both runtime service execution and unit testing. Services interact solely with DAO interfaces:
+Polymorphism is leveraged extensively across the application architecture. Services interact solely with DAO interfaces:
 \begin{lstlisting}[language=Java, caption={Dynamic Polymorphism via Dependency Injection}]
 public class BorrowService {
     private final BorrowTransactionDAO transactionDAO;
@@ -74,7 +74,7 @@ public class BorrowService {
     }
 }
 \end{lstlisting}
-At application runtime, \texttt{MainApplication} injects concrete implementations (\texttt{BorrowTransactionDAOImpl}, \texttt{BookDAOImpl}) that interact with MySQL over JDBC. During unit test execution, test fixtures inject in-memory mock stubs implementing the exact same interfaces, verifying business logic without side effects.
+At application runtime, \texttt{MainApplication} injects concrete implementations (\texttt{BorrowTransactionDAOImpl}, \texttt{BookDAOImpl}) that interact with MySQL over JDBC. This interface-based abstraction ensures loose coupling and makes the business logic modular, clean, and extensible.
 
 \section{Database Connectivity and Defensive JDBC Engineering}
 
@@ -120,7 +120,7 @@ try (Connection conn = DatabaseConnection.getConnection();
 \section{Critical Business Logic and Algorithms}
 
 \subsection{Clock-Aware Overdue Fine Calculation Engine}
-The circulation engine computes overdue periods and financial liabilities dynamically using Java's \texttt{java.time} API. To enable deterministic unit testing without altering workstation system clocks, the engine supports temporal clock injection via \texttt{java.time.Clock}:
+The circulation engine computes overdue periods and financial liabilities dynamically using Java's \texttt{java.time} API, accurately calculating overdue days and late fee liabilities against calendar dates:
 \begin{lstlisting}[language=Java, caption={Clock-Aware Fine Calculation Engine}]
 public BigDecimal calculateOverdueFine(LocalDate dueDate) {
     LocalDate today = LocalDate.now(clock);

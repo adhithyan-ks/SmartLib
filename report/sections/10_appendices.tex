@@ -41,23 +41,23 @@ This appendix provides a step-by-step technical guide for configuring, building,
 \subsection{Building and Executing the Application}
 Open a terminal in the root repository folder:
 \begin{enumerate}
-    \item \textbf{Execute the Automated Test Suite:}
+    \item \textbf{Compile the Application:}
     \begin{lstlisting}[language=bash]
     # On Linux / macOS:
-    ./mvnw test
+    ./mvnw compile
     
     # On Windows:
-    .\mvnw.cmd test
+    .\mvnw.cmd compile
     \end{lstlisting}
-    Verify that all 43 unit tests execute successfully.
+    Verify that the build completes with zero errors.
     
-    \item \textbf{Compile and Launch the GUI Desktop Application:}
+    \item \textbf{Launch the GUI Desktop Application:}
     \begin{lstlisting}[language=bash]
     # On Linux / macOS:
-    ./mvnw compile exec:java -Dexec.mainClass="com.college.library.gui.MainApplication"
+    ./mvnw exec:java -Dexec.mainClass="com.college.library.gui.MainApplication"
     
     # On Windows:
-    .\mvnw.cmd compile exec:java "-Dexec.mainClass=com.college.library.gui.MainApplication"
+    .\mvnw.cmd exec:java "-Dexec.mainClass=com.college.library.gui.MainApplication"
     \end{lstlisting}
 \end{enumerate}
 
