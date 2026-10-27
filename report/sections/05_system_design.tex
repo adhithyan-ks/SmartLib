@@ -59,13 +59,14 @@ The static structure of SmartLib is centered around domain models, generic data 
 
 \begin{figure}[h!]
 \centering
+\resizebox{0.95\linewidth}{!}{
 \begin{tikzpicture}[
     classbox/.style={rectangle, draw=black!80, fill=yellow!10, rounded corners=2pt, font=\scriptsize, align=left, inner sep=4pt},
-    arrow/.style={->, >=stealth, thick},
-    rel/.style={dashed, ->, >=stealth, font=\tiny}
+    arrow/.style={->, >=open triangle 60, thick},
+    rel/.style={dashed, ->, >=stealth, font=\scriptsize}
 ]
-    % Row 1 (Top): Person (left), Librarian (middle), Book (right)
-    \node[classbox, text width=4.1cm] (person) at (0, 0) {
+    % Top Row (y = 2.5): Person (left), Librarian (middle)
+    \node[classbox, text width=4.0cm] (person) at (0, 2.5) {
         \textbf{\centerline{<<abstract>> Person}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \# id : String\\
@@ -75,7 +76,7 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getName() : String
     };
     
-    \node[classbox, text width=4.1cm] (librarian) at (5.0, 0) {
+    \node[classbox, text width=4.0cm] (librarian) at (6.5, 2.5) {
         \textbf{\centerline{Librarian}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         - id : int\\
@@ -86,22 +87,8 @@ The static structure of SmartLib is centered around domain models, generic data 
         + setUsername(String)
     };
     
-    \node[classbox, text width=4.1cm] (book) at (10.0, 0) {
-        \textbf{\centerline{Book}}\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        - accessionId : String\\
-        - isbn : String\\
-        - title : String\\
-        - author : String\\
-        - categoryId : int\\
-        - status : BookStatus\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        + getAccessionId() : String\\
-        + getStatus() : BookStatus
-    };
-    
-    % Row 2 (Bottom): Student (under Person), BorrowTransaction (between Librarian & Book)
-    \node[classbox, text width=4.1cm] (student) at (0, -4.1) {
+    % Bottom Row (y = -3.2): Student (left), BorrowTransaction (middle), Book (right)
+    \node[classbox, text width=4.0cm] (student) at (0, -3.2) {
         \textbf{\centerline{Student}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         - ktuId : String\\
@@ -116,7 +103,7 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getBranch() : String
     };
     
-    \node[classbox, text width=4.4cm] (tx) at (7.5, -4.1) {
+    \node[classbox, text width=4.2cm] (tx) at (6.5, -3.2) {
         \textbf{\centerline{BorrowTransaction}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         - id : int\\
@@ -132,16 +119,31 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getDueDate() : LocalDate\\
         + getFine() : BigDecimal
     };
+
+    \node[classbox, text width=4.0cm] (book) at (13.0, -3.2) {
+        \textbf{\centerline{Book}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - accessionId : String\\
+        - isbn : String\\
+        - title : String\\
+        - author : String\\
+        - categoryId : int\\
+        - status : BookStatus\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getAccessionId() : String\\
+        + getStatus() : BookStatus
+    };
     
-    % Inheritance
+    % Generalization (Inheritance) - UML hollow triangle
     \draw[arrow] (student.north) -- (person.south);
     \draw[arrow] (librarian.west) -- (person.east);
     
-    % Relationships
+    % Associations
     \draw[rel] (tx.west) -- (student.east) node[midway, above] {borrowed by};
-    \draw[rel] (tx.north -| librarian.south) -- (librarian.south) node[midway, left] {processed by};
-    \draw[rel] (tx.north -| book.south) -- (book.south) node[midway, right] {references};
+    \draw[rel] (tx.north) -- (librarian.south) node[midway, right] {processed by};
+    \draw[rel] (tx.east) -- (book.west) node[midway, above] {references};
 \end{tikzpicture}
+}
 \caption{UML Class Diagram of Core Domain Entities}
 \label{fig:class_diagram}
 \end{figure}
