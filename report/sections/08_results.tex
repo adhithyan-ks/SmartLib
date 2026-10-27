@@ -1,7 +1,7 @@
 \chapter{Results}
 
 \section{Application Functionality Overview}
-The completed SmartLib desktop system successfully unifies all library circulation operations into a cohesive, production-grade graphical user interface. The system provides instantaneous navigation between administrative tasks for librarians and self-service inquiries for students.
+The completed SmartLib desktop system successfully unifies core library circulation operations into a cohesive graphical user interface. The system provides responsive navigation between administrative tasks for librarians and self-service inquiries for students.
 
 Key operational capabilities verified in the live system include:
 \begin{itemize}
@@ -37,7 +37,7 @@ Figure~\ref{fig:screenshot_dashboard} illustrates the Librarian Dashboard. Top-l
 \end{figure}
 
 \subsection{Book Inventory Management Panel}
-Figure~\ref{fig:screenshot_books} depicts the Book Catalog management interface. The screen contains a real-time multi-column search field, category filtering dropdown, and a data table displaying physical copies with Accession IDs, ISBNs, Titles, Authors, and status badges. The side form allows librarians to catalog new acquisitions.
+Figure~\ref{fig:screenshot_books} depicts the Book Catalog management interface. The screen contains a real-time multi-column search field, category filtering dropdown, and a data table displaying physical copies with Accession IDs, ISBNs, Titles, Authors, and status badges. The action header allows librarians to add new book copies or delete selected entries (in-place metadata editing is not included in the current UI version).
 
 \begin{figure}[h!]
     \centering
@@ -46,13 +46,13 @@ Figure~\ref{fig:screenshot_books} depicts the Book Catalog management interface.
     \label{fig:screenshot_books}
 \end{figure}
 
-\subsection{Student Management and Clearance Panel}
-Figure~\ref{fig:screenshot_students} shows the Student Management desk. Entering a valid KTU ID automatically parses and populates the student's admission year, batch, and engineering branch. The right-hand panel provides student clearance verification, inspecting active loans and outstanding fine liabilities before certifying institutional clearance.
+\subsection{Student Directory and Account Management Panel}
+Figure~\ref{fig:screenshot_students} shows the Student Directory desk. Entering a valid KTU ID during student registration automatically parses and populates the student's admission year, batch, and engineering branch. The panel allows librarians to view registered student profiles, activate or deactivate circulation access, and delete accounts (subject to deletion safeguards preventing removal of students with active loans or unreturned records).
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.94\textwidth]{figures/screenshot_students.png}
-    \caption{Student Management and Clearance Panel (\texttt{StudentPanel})}
+    \caption{Student Directory and Account Management Panel (\texttt{StudentPanel})}
     \label{fig:screenshot_students}
 \end{figure}
 
@@ -110,7 +110,7 @@ To demonstrate system execution, three representative operational workflows are 
     \item \textbf{Output / Result:} A success dialog displays \textit{"Book issued successfully! Due date: 2026-11-06"}. The book's status pill in the catalog immediately changes from Green (\texttt{AVAILABLE}) to Amber (\texttt{ISSUED}), and the transaction appears in the Active Borrowings table.
 \end{itemize}
 
-\subsection{Scenario B: Overdue Book Return with Fine Calculation and Reservation Trigger}
+\subsection{Scenario B: Overdue Book Return with Fine Calculation and Reservation Alert}
 \begin{itemize}
     \item \textbf{Initial Context:} Book \texttt{"B1003"} (\textit{Domain-Driven Design}) was issued to \texttt{"TVE23CS001"} with due date \texttt{2023-10-15}. Another student \texttt{"TVE23CS002"} placed a reservation on that ISBN. The book is returned today.
     \item \textbf{Input Data:} Book Accession ID: \texttt{"B1003"}.
@@ -121,21 +121,22 @@ To demonstrate system execution, three representative operational workflows are 
         \item Accrued fine computed as $\text{Days Overdue} \times \text{\rupee} 10.00$.
         \item Transaction updated in database: status set to \texttt{'COMPLETED'}, return date set to current date, assessed fine recorded.
         \item Book status reset to \texttt{AVAILABLE}.
-        \item \texttt{ReservationDAO.findEarliestPendingByIsbn()} locates the pending reservation for \texttt{"TVE23CS002"}.
-        \item The reservation status transitions to \texttt{'FULFILLED'}.
+        \item \texttt{ReservationDAO.findOldestPendingByIsbn()} detects that a pending reservation exists for \texttt{"TVE23CS002"}.
+        \item The service appends an attention notice to the return confirmation message.
     \end{enumerate}
-    \item \textbf{Output / Result:} The return is confirmed, displaying the calculated fine. An alert dialog informs the librarian: \textit{"Pending reservation fulfilled for student TVE23CS002! Please hold this book."}
+    \item \textbf{Output / Result:} The return is confirmed displaying the fine. An alert dialog informs the librarian: \textit{"ATTENTION: This book is reserved!\textbackslash nNext Student in Queue: TVE23CS002\textbackslash nPlease set this book aside."}
 \end{itemize}
 
-\subsection{Scenario C: Student Clearance Verification}
+\subsection{Scenario C: Student Deletion Safeguard and Audit Protection}
 \begin{itemize}
-    \item \textbf{Initial Context:} Graduating student \texttt{"TVE23CS001"} applies for institutional transfer clearance.
-    \item \textbf{Input Data:} KTU ID: \texttt{"TVE23CS001"}.
+    \item \textbf{Initial Context:} A librarian attempts to delete student record \texttt{"TVE23CS001"} (\textit{Alice Smith}) from the Student Directory desk. The student currently has an active borrowed book and historical loan records.
+    \item \textbf{Input Data:} Select row \texttt{"TVE23CS001"} in \texttt{StudentPanel}, click \textit{"Delete Student"}.
     \item \textbf{Processing Logic:}
     \begin{enumerate}
-        \item \texttt{StudentService.verifyClearance("TVE23CS001")} queries \texttt{borrow\_transactions} for active unreturned loans.
-        \item If unreturned books exist, clearance is flagged as rejected (\texttt{false}), and the accession IDs of unreturned volumes are listed.
-        \item Queries for any unpaid fines. If balance $> 0$, the total dues amount is reported.
+        \item \texttt{StudentService.deleteStudent()} queries the student's associated records across \texttt{BorrowTransactionDAO}, \texttt{BorrowRequestDAO}, and \texttt{ReservationDAO}.
+        \item Identifies 1 active borrowed book and associated historical circulation records.
+        \item Builds an itemized list of blocking reasons to prevent foreign key errors and preserve historical records.
+        \item Throws a descriptive \texttt{LibraryException} instructing the user to deactivate rather than delete.
     \end{enumerate}
-    \item \textbf{Output / Result:} If clear, displays a green \textit{"Clearance Approved: No Outstanding Dues"} certificate. If outstanding items exist, an itemized liability summary is generated.
+    \item \textbf{Output / Result:} An alert dialog appears: \textit{"Cannot permanently delete student TVE23CS001: Related records exist (1 active borrowed book(s)...). To preserve borrowing history, please deactivate the student instead."} The student record remains intact in the database.
 \end{itemize}

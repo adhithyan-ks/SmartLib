@@ -18,12 +18,12 @@ To address the defined problem statement, the SmartLib project was structured ar
 \begin{itemize}
     \item \textbf{Tiered Separation of Concerns:} Implement a rigorous Multi-Tier Layered Architecture consisting of Presentation Layer (\texttt{gui}), Business Service Layer (\texttt{service}), Data Access Object Layer (\texttt{dao} and \texttt{dao.impl}), and Persistent Relational Database (MySQL).
     \item \textbf{Interface-Driven Design:} Abstract all persistence operations behind generic interfaces (\texttt{CrudDAO<T, ID>}), ensuring the high-level business services remain completely decoupled from specific database queries and JDBC drivers.
-    \item \textbf{Defensive Database Engineering:} Guarantee ACID compliance by managing database connections through a dedicated connection manager, enforcing parameterized SQL queries via \texttt{PreparedStatement} to eliminate SQL injection vulnerabilities, and managing connection lifecycles via Java \texttt{try-with-resources}.
+    \item \textbf{Defensive Database Engineering:} Support data consistency and transaction integrity by managing database connections through a dedicated connection manager, enforcing parameterized SQL queries via \texttt{PreparedStatement} to prevent SQL injection vulnerabilities, and managing connection lifecycles via Java \texttt{try-with-resources}.
 \end{itemize}
 
 \subsection{Functional Objectives}
 \begin{itemize}
-    \item \textbf{Dual Role-Based Authentication:} Provide isolated authentication pipelines for Librarians and Students, securing credentials using industry-standard 12-round BCrypt salt hashing.
+    \item \textbf{Dual Role-Based Authentication:} Provide isolated authentication pipelines for Librarians and Students, securing credentials using 12-round BCrypt salt hashing \cite{miller2020jbcrypt,provos1999bcrypt}.
     \item \textbf{Automated Circulation Desk \& Active Borrowings Tracking:} Equip the circulation desk with a live 10-column tracking grid of all active loans, dynamic overdue day calculation, clock-aware overdue fine estimation ($\text{\rupee} 10/\text{day}$), multi-column search, and direct single-click returns.
     \item \textbf{Automated Reservation Pipeline:} Establish a FIFO reservation queue that permits students to reserve titles currently checked out, automatically alerting the librarian to fulfill pending reservations when the title is returned.
     \item \textbf{Student Self-Service Portal:} Provide students with direct catalog browsing, real-time availability inquiries, online borrow request submissions, and clear oversight of personal loan records and accumulated dues.
@@ -33,5 +33,5 @@ To address the defined problem statement, the SmartLib project was structured ar
 \subsection{Quality and Verification Objectives}
 \begin{itemize}
     \item \textbf{Comprehensive Functional Testing:} Conduct structured manual black-box functional testing through the graphical user interface, validating all user workflows, boundary validations, role-based permissions, and business rules against the live database.
-    \item \textbf{Industrial Ergonomics:} Build a professional, polished Java Swing user interface utilizing a cohesive design theme (\texttt{UITheme}), clean typography, card layout navigation, and custom table selection managers.
+    \item \textbf{Ergonomic User Interface:} Build a clean, consistent Java Swing user interface utilizing a cohesive design theme (\texttt{UITheme}), clear typography, card layout navigation, and custom table selection managers.
 \end{itemize}

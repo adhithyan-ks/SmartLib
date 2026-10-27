@@ -1,7 +1,7 @@
 \chapter{Implementation}
 
 \section{Development Platform and Toolchain}
-SmartLib was developed using standard Java SE 17 (Long-Term Support) on modern Linux and Windows environments. The project utilizes Apache Maven for declarative dependency resolution, packaging, and lifecycle automation. A project-level Maven Wrapper (\texttt{mvnw} / \texttt{mvnw.cmd}) is included to enable reproducible builds across heterogeneous workstations without requiring manual Maven installations.
+SmartLib was developed using standard Java SE 17 (Long-Term Support) \cite{oracle2021javase} on modern Linux and Windows environments, interfacing with MySQL using the official Connector/J JDBC driver \cite{mysqlconnector2023}. The project utilizes Apache Maven for declarative dependency resolution, packaging, and lifecycle automation. A project-level Maven Wrapper (\texttt{mvnw} / \texttt{mvnw.cmd}) is included to enable reproducible builds across workstations without requiring manual Maven installations.
 
 \section{Implementation of Object-Oriented Programming (OOP) Principles}
 
@@ -40,7 +40,7 @@ public interface CrudDAO<T, ID> {
 Concrete entities specialize this abstraction by extending the base interface (e.g., \texttt{BookDAO extends CrudDAO<Book, String>}), adding domain-specific query contracts such as \texttt{findByIsbn()} and \texttt{updateStatus()}.
 
 \subsection{Inheritance Hierarchies}
-Code duplication across user roles is eliminated through the \texttt{Person} generalization hierarchy. The abstract base class \texttt{Person} encapsulates fundamental human properties (\texttt{id}, \texttt{name}), while specialized subclasses (\texttt{Student} and \texttt{Librarian}) extend it with role-specific attributes:
+Code duplication across user roles is minimized through the \texttt{Person} generalization hierarchy \cite{bloch2018effective}. The abstract base class \texttt{Person} encapsulates fundamental human properties (\texttt{id}, \texttt{name}), while specialized subclasses (\texttt{Student} and \texttt{Librarian}) extend it with role-specific attributes:
 \begin{lstlisting}[language=Java, caption={Inheritance Hierarchy}]
 public abstract class Person {
     protected String id;
@@ -103,7 +103,7 @@ public class DatabaseConnection {
 \end{lstlisting}
 
 \subsection{SQL Injection Mitigation and Resource Safety}
-SmartLib strictly prohibits dynamic string concatenation when formulating database queries. All queries utilize parameterized \texttt{PreparedStatement} objects, and all database resources are wrapped in Java \texttt{try-with-resources} blocks to guarantee leak-free deterministic resource cleanup:
+SmartLib strictly avoids dynamic string concatenation when formulating database queries. All queries utilize parameterized \texttt{PreparedStatement} objects, and all database resources are wrapped in Java \texttt{try-with-resources} blocks to ensure reliable deterministic resource cleanup \cite{oracle2021jdbc}:
 \begin{lstlisting}[language=Java, caption={Defensive JDBC Operation in BookDAOImpl}]
 String sql = "SELECT * FROM books WHERE accession_id = ?";
 try (Connection conn = DatabaseConnection.getConnection();

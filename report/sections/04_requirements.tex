@@ -14,17 +14,17 @@ The functional requirements specify the actions, operations, and behaviors that 
 
     \item \textbf{Book Catalog and Inventory Management:}
     \begin{itemize}
-        \item Librarians must be able to add, update, delete, and view books.
+        \item Librarians must be able to add, delete, and view books in the catalog (in-place metadata editing is not included in the current UI; corrections require removing and re-cataloging the item, with in-place editing planned for future releases).
         \item Each physical book copy must be tracked via a unique \texttt{accession\_id} (e.g., \texttt{B1001}), while sharing bibliographic attributes such as ISBN, title, author, and academic category.
         \item Book inventory status must transition strictly between defined enumerations: \texttt{AVAILABLE}, \texttt{ISSUED}, \texttt{LOST}, and \texttt{DAMAGED}.
         \item The catalog must support real-time text-based search across titles, authors, ISBNs, and categories.
     \end{itemize}
 
-    \item \textbf{Student Membership and Clearance Management:}
+    \item \textbf{Student Membership and Account Safeguards:}
     \begin{itemize}
-        \item Librarians must be able to enroll students, edit profiles, and view academic standings.
+        \item Librarians must be able to enroll students, activate/deactivate accounts, delete eligible student records, and view enrolled students.
         \item Entering a valid KTU ID must automatically parse and populate the student's admission year, academic batch, and engineering branch.
-        \item The system must provide a clearance check mechanism that inspects whether a student has any outstanding unreturned books or unpaid fines before granting graduation/transfer clearance.
+        \item The system must provide dues visibility on the student portal and enforce deletion safeguards on student records, preventing deletion of accounts that have active loans or unreturned books.
     \end{itemize}
 
     \item \textbf{Circulation Desk and Active Borrowings Management:}
@@ -67,8 +67,8 @@ The functional requirements specify the actions, operations, and behaviors that 
 
     \item \textbf{Security and Data Integrity:}
     \begin{itemize}
-        \item Complete protection against SQL Injection attacks through universal enforcement of parameterized \texttt{PreparedStatement} queries across all DAO implementations.
-        \item Passwords protected using BCrypt hashing with a computational cost factor of 12 rounds.
+        \item Protection against SQL Injection vulnerabilities through universal enforcement of parameterized \texttt{PreparedStatement} queries across all DAO implementations.
+        \item Passwords protected using BCrypt hashing with a computational cost factor of 12 rounds \cite{miller2020jbcrypt}.
         \item Externalization of database credentials into \texttt{database.properties}, which is excluded from version control systems.
     \end{itemize}
 

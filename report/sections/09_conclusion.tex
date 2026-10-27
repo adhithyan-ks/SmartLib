@@ -1,15 +1,15 @@
 \chapter{Conclusion and Future Enhancements}
 
 \section{Summary of Achievements}
-The development of \textbf{SmartLib} has successfully produced a robust, production-grade College Library Management System that addresses the operational challenges of academic circulation desks while embodying professional software engineering standards.
+The development of \textbf{SmartLib} has produced a reliable, multi-tier College Library Management System that addresses core operational needs of academic circulation desks while applying object-oriented software engineering principles.
 
 All primary project objectives have been fulfilled:
 \begin{enumerate}
-    \item \textbf{Architectural Integrity:} The multi-tier architecture cleanly isolates user interface presentation (\texttt{gui}), institutional business logic (\texttt{service}), data access abstraction (\texttt{dao}), and relational persistence (MySQL), adhering to the Single Responsibility Principle and Dependency Inversion Principle.
+    \item \textbf{Architectural Integrity:} The multi-tier architecture cleanly isolates user interface presentation (\texttt{gui}), institutional business logic (\texttt{service}), data access abstraction (\texttt{dao}), and relational persistence (MySQL), adhering to the Single Responsibility Principle and Dependency Inversion Principle \cite{bloch2018effective,gamma1994design}.
     \item \textbf{Circulation Excellence:} The Circulation Desk has been augmented with real-time Active Borrowings Management, providing librarians with live visibility over all active loans, dynamic clock-aware overdue calculations ($\text{\rupee} 10.00$/day), multi-column search, and direct one-click returns.
-    \item \textbf{Algorithmic Concurrency and Fair Queueing:} Title-level reservations eliminate double-booking conflicts via an automated FIFO pipeline that alerts staff upon book return.
-    \item \textbf{Cryptographic Security and Role Separation:} Passwords are protected using 12-round BCrypt salt hashing, SQL injection vulnerabilities are eliminated through ubiquitous use of parameterized \texttt{PreparedStatement} queries, and database credentials are decoupled into external configuration files.
-    \item \textbf{Verification and Quality Assurance:} The core business workflows and graphical user interfaces were validated through comprehensive manual functional testing, verifying 100\% operational success across all user interactions, input validations, circulation desks, and inventory controls.
+    \item \textbf{Fair Queueing and Reservation Alerts:} Title-level reservations mitigate double-booking conflicts via an automated FIFO pipeline that alerts staff upon book return.
+    \item \textbf{Cryptographic Security and Role Separation:} Passwords are protected using 12-round BCrypt salt hashing \cite{miller2020jbcrypt}, SQL injection risks are mitigated through ubiquitous use of parameterized \texttt{PreparedStatement} queries \cite{oracle2021jdbc}, and database credentials are decoupled into external configuration files.
+    \item \textbf{Verification and Quality Assurance:} The core business workflows and graphical user interfaces were validated through manual functional testing, confirming expected behavior across 38 manual UI test scenarios covering user authentication, input validations, circulation desks, active loan tracking, and inventory controls.
 \end{enumerate}
 
 \section{Educational Outcomes and Retrospective}

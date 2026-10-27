@@ -22,3 +22,15 @@ target/
 database.properties
 *.env
 
+# LaTeX Build Artifacts
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.lof
+report/*.lot
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+
+

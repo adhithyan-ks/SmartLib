@@ -1,13 +1,9 @@
-\chapter*{Appendices}
-\addcontentsline{toc}{chapter}{Appendices}
-\renewcommand{\thesection}{\Alph{section}}
-\setcounter{section}{0}
-
-\section{User Manual and Installation Instructions}
+\appendix
+\chapter{User Manual and Installation Instructions}
 
 This appendix provides a step-by-step technical guide for configuring, building, and running SmartLib on a fresh development machine.
 
-\subsection{Prerequisites Checklist}
+\section{Prerequisites Checklist}
 \begin{itemize}
     \item \textbf{Java SE Development Kit (JDK 17 or higher):} Ensure \texttt{JAVA\_HOME} environment variable points to your JDK directory and \texttt{java -version} reports version 17 or above.
     \item \textbf{MySQL Community Server (Version 8.0 or higher):} Installed and running on default TCP port \texttt{3306}.
@@ -15,7 +11,7 @@ This appendix provides a step-by-step technical guide for configuring, building,
     \item \textbf{Maven:} Optional. The repository includes an executable Maven Wrapper (\texttt{mvnw} for Linux/macOS, \texttt{mvnw.cmd} for Windows).
 \end{itemize}
 
-\subsection{Database Initialization}
+\section{Database Initialization}
 \begin{enumerate}
     \item Open MySQL Command Line Client or MySQL Workbench:
     \begin{lstlisting}[language=SQL]
@@ -26,7 +22,7 @@ This appendix provides a step-by-step technical guide for configuring, building,
     \item Execute the sample data population script located at \texttt{src/main/resources/sample\_data.sql} to seed default categories, books, student records, and librarian administrative accounts.
 \end{enumerate}
 
-\subsection{Database Configuration}
+\section{Database Configuration}
 \begin{enumerate}
     \item Navigate to \texttt{src/main/resources/}.
     \item Create a copy of \texttt{database.properties.example} and save it as \texttt{database.properties}.
@@ -38,7 +34,7 @@ This appendix provides a step-by-step technical guide for configuring, building,
     \end{lstlisting}
 \end{enumerate}
 
-\subsection{Building and Executing the Application}
+\section{Building and Executing the Application}
 Open a terminal in the root repository folder:
 \begin{enumerate}
     \item \textbf{Compile the Application:}
@@ -61,7 +57,7 @@ Open a terminal in the root repository folder:
     \end{lstlisting}
 \end{enumerate}
 
-\subsection{Default User Credentials}
+\section{Default User Credentials}
 \begin{table}[h!]
     \centering
     \caption{Default Seed Credentials for Verification}
@@ -77,7 +73,7 @@ Open a terminal in the root repository folder:
     \label{tab:seed_creds}
 \end{table}
 
-\subsection{Troubleshooting Matrix}
+\section{Troubleshooting Matrix}
 \begin{table}[h!]
     \centering
     \caption{Common Setup Errors and Solutions}
@@ -98,9 +94,9 @@ Open a terminal in the root repository folder:
 \end{table}
 
 \newpage
-\section{Selected Source Code Listings}
+\chapter{Selected Source Code Listings}
 
-\subsection{Generic Base Data Access Object (\texttt{CrudDAO.java})}
+\section{Generic Base Data Access Object: \texttt{CrudDAO.java}}
 \begin{lstlisting}[language=Java, caption={Generic CrudDAO Interface}]
 package com.college.library.dao;
 
@@ -117,7 +113,7 @@ public interface CrudDAO<T, ID> {
 }
 \end{lstlisting}
 
-\subsection{Circulation Desk and Dynamic Fine Engine (\texttt{BorrowService.java})}
+\section{Circulation Desk and Fine Engine: \texttt{BorrowService.java}}
 \begin{lstlisting}[language=Java, caption={Core Methods in BorrowService.java}]
 package com.college.library.service;
 
@@ -242,7 +238,7 @@ public class BorrowService {
 }
 \end{lstlisting}
 
-\subsection{Centralized Design System (\texttt{UITheme.java})}
+\section{Centralized Design System: \texttt{UITheme.java}}
 \begin{lstlisting}[language=Java, caption={Centralized UI Theme Styling Engine}]
 package com.college.library.gui;
 

@@ -51,7 +51,7 @@ SmartLib is designed strictly according to the \textbf{Multi-Tier Layered Archit
     \item \textbf{Presentation Layer (\texttt{gui}):} Exclusively manages the visual components and user interactions using Java Swing and AWT. It contains zero SQL queries or business calculation logic. View transitions are driven by a centralized \texttt{CardLayout} router managed by \texttt{MainApplication}.
     \item \textbf{Business Service Layer (\texttt{service}):} Encapsulates institutional policies, operational constraints, and domain algorithms. It coordinates transactions, verifies loan limits, computes clock-aware fines, manages FIFO reservation fulfillment, and communicates strictly through DAO interface references.
     \item \textbf{Data Access Object Layer (\texttt{dao} and \texttt{dao.impl}):} Implements the DAO design pattern to insulate business services from database specifics. It encapsulates raw SQL queries, prepares statements, and maps relational result sets into Java domain entities.
-    \item \textbf{Persistence Layer (MySQL):} Manages data storage, relational integrity, primary and foreign key constraints, indexes, and ACID guarantees.
+    \item \textbf{Persistence Layer (MySQL):} Manages data storage, relational integrity, primary and foreign key constraints, indexes, and ACID transactional properties supported by InnoDB \cite{mysql2023manual}.
 \end{enumerate}
 
 \section{Class Diagram}
@@ -146,7 +146,7 @@ The static structure of SmartLib is centered around domain models, generic data 
 \section{Class Descriptions, Attributes, and Methods}
 
 \subsection{Domain Models (\texttt{com.college.library.model} and \texttt{dto})}
-\begin{longtable}{p{3.2cm}p{4.2cm}p{6.8cm}}
+\begin{longtable}{p{3.0cm}p{4.0cm}p{6.5cm}}
 \caption{Domain Model Class Specifications} \label{tab:models_spec} \\
 \toprule
 \textbf{Class Name} & \textbf{Attributes} & \textbf{Methods and Responsibilities} \\
@@ -180,7 +180,7 @@ The static structure of SmartLib is centered around domain models, generic data 
 \end{longtable}
 
 \subsection{Business Services (\texttt{com.college.library.service})}
-\begin{longtable}{p{3.5cm}p{4cm}p{6.8cm}}
+\begin{longtable}{p{3.2cm}p{3.8cm}p{6.5cm}}
 \caption{Business Service Layer Class Specifications} \label{tab:services_spec} \\
 \toprule
 \textbf{Service Name} & \textbf{DAO Dependencies} & \textbf{Core Methods and Responsibilities} \\
@@ -198,7 +198,7 @@ The static structure of SmartLib is centered around domain models, generic data 
 \midrule
 \texttt{BookService} & \texttt{BookDAO} & \texttt{addBook()}, \texttt{updateBook()}, \texttt{deleteBook()}, \texttt{searchBooks()}. Enforces catalog rules and unique accession constraints. \\
 \midrule
-\texttt{StudentService} & \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO} & \texttt{registerStudent()}, \texttt{updateStudent()}, \texttt{getStudentDues()}, \texttt{verifyClearance()}. Computes academic clearances and outstanding debts. \\
+\texttt{StudentService} & \texttt{StudentDAO}, \texttt{BorrowTransactionDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO} & \texttt{addStudent()}, \texttt{updateStudent()}, \texttt{deleteStudent()}, \texttt{activateStudent()}, \texttt{deactivateStudent()}. Enforces student account management and prevents deletion of active borrowers. \\
 \midrule
 \texttt{BorrowService} & \texttt{BorrowTransactionDAO}, \texttt{BookDAO}, \texttt{StudentDAO}, \texttt{ReservationDAO}, \texttt{BorrowRequestDAO} & \texttt{issueBook()}, \texttt{returnBook()}, \texttt{getAllActiveBorrowings()}, \texttt{calculateOverdueFine()}. Core circulation engine with clock-aware fine computation and reservation triggers. \\
 \midrule
@@ -208,7 +208,7 @@ The static structure of SmartLib is centered around domain models, generic data 
 \end{longtable}
 
 \subsection{Data Access Layer (\texttt{com.college.library.dao} and \texttt{dao.impl})}
-\begin{longtable}{p{3.2cm}p{3.8cm}p{7.3cm}}
+\begin{longtable}{p{3.0cm}p{3.6cm}p{6.9cm}}
 \caption{Data Access Layer Specifications} \label{tab:dao_spec} \\
 \toprule
 \textbf{Interface / Impl} & \textbf{Generic Base} & \textbf{Key Query Methods} \\
@@ -243,7 +243,7 @@ SmartLib demonstrates the primary object-oriented relationships:
     \item \textbf{Composition and Aggregation:}
     \begin{itemize}
         \item \texttt{MainApplication} composes the application's view panels and coordinates their lifecycle.
-        \item Business services compose DAO interface references via constructor injection, guaranteeing that service logic is independent of persistence implementations.
+        \item Business services compose DAO interface references via constructor injection, ensuring that service logic remains decoupled from specific persistence implementations \cite{gamma1994design}.
     \end{itemize}
     \item \textbf{Association and Dependency:}
     \begin{itemize}
