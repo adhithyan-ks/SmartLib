@@ -264,20 +264,20 @@ The persistence tier comprises 7 normalized tables managing user profiles, physi
 
 \begin{figure}[h!]
 \centering
+\resizebox{0.95\linewidth}{!}{
 \begin{tikzpicture}[
-    dbtable/.style={rectangle, draw=black!70, fill=gray!8, rounded corners=2pt, font=\scriptsize, align=left, inner sep=6pt},
+    dbtable/.style={rectangle, draw=black!70, fill=gray!8, rounded corners=2pt, font=\scriptsize, align=left, inner sep=5pt},
     arrow/.style={->, >=stealth, thick, color=black!80}
 ]
-    % Categories
-    \node[dbtable, text width=3.8cm] (categories) {
+    % Top Row (y = 2.6)
+    \node[dbtable, text width=4.2cm] (categories) at (0, 2.6) {
         \textbf{\centerline{categories}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \underline{id} : INT [PK, AI]\\
         name : VARCHAR(100) [UQ]
     };
     
-    % Books
-    \node[dbtable, text width=4.5cm, right=1.5cm of categories] (books) {
+    \node[dbtable, text width=5.0cm] (books) at (7.2, 2.6) {
         \textbf{\centerline{books}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \underline{accession\_id} : VARCHAR(20) [PK]\\
@@ -287,9 +287,18 @@ The persistence tier comprises 7 normalized tables managing user profiles, physi
         category\_id : INT [FK]\\
         status : ENUM(...)
     };
+
+    \node[dbtable, text width=4.8cm] (librarians) at (14.4, 2.6) {
+        \textbf{\centerline{librarians}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        \underline{id} : INT [PK, AI]\\
+        username : VARCHAR(50) [UQ]\\
+        password\_hash : VARCHAR(255)\\
+        name : VARCHAR(100)
+    };
     
-    % Students
-    \node[dbtable, text width=4.5cm, below=1.5cm of categories] (students) {
+    % Bottom Row (y = -3.2)
+    \node[dbtable, text width=4.8cm] (students) at (0, -3.2) {
         \textbf{\centerline{students}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \underline{ktu\_id} : VARCHAR(20) [PK]\\
@@ -303,18 +312,7 @@ The persistence tier comprises 7 normalized tables managing user profiles, physi
         status : VARCHAR(20)
     };
     
-    % Librarians
-    \node[dbtable, text width=4.2cm, below=1.5cm of books] (librarians) {
-        \textbf{\centerline{librarians}}\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        \underline{id} : INT [PK, AI]\\
-        username : VARCHAR(50) [UQ]\\
-        password\_hash : VARCHAR(255)\\
-        name : VARCHAR(100)
-    };
-    
-    % Borrow Transactions
-    \node[dbtable, text width=5.2cm, below=1.2cm of students] (tx) {
+    \node[dbtable, text width=5.0cm] (tx) at (7.2, -3.2) {
         \textbf{\centerline{borrow\_transactions}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \underline{id} : INT [PK, AI]\\
@@ -325,15 +323,16 @@ The persistence tier comprises 7 normalized tables managing user profiles, physi
         due\_date : DATE\\
         return\_date : DATE\\
         fine : DECIMAL(10,2)\\
-        status : ENUM('ACTIVE', 'COMPLETED')
+        status : ENUM(...)
     };
     
     % Foreign Key Connections
-    \draw[arrow] (books.west) -- (categories.east) node[midway, above, font=\tiny] {category\_id};
-    \draw[arrow] (tx.north) -- (students.south) node[midway, left, font=\tiny] {student\_id};
-    \draw[arrow] (tx.north east) -- (books.south) node[midway, above, font=\tiny] {book\_id};
-    \draw[arrow] (tx.east) -| (librarians.south) node[midway, below, font=\tiny] {librarian\_id};
+    \draw[arrow] (books.west) -- (categories.east) node[midway, above=2pt, font=\scriptsize] {category\_id};
+    \draw[arrow] (tx.north) -- (books.south) node[midway, right=2pt, font=\scriptsize] {book\_id};
+    \draw[arrow] (tx.west) -- (students.east) node[midway, above=2pt, font=\scriptsize] {student\_id};
+    \draw[arrow] (tx.east) -| node[pos=0.35, above=2pt, font=\scriptsize] {librarian\_id} (librarians.south);
 \end{tikzpicture}
+}
 \caption{Entity-Relationship (ER) Diagram of SmartLib Database}
 \label{fig:er_diagram}
 \end{figure}
