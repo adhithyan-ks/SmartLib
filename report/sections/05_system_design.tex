@@ -60,11 +60,12 @@ The static structure of SmartLib is centered around domain models, generic data 
 \begin{figure}[h!]
 \centering
 \begin{tikzpicture}[
-    classbox/.style={rectangle, draw=black!80, fill=yellow!10, rounded corners=2pt, font=\scriptsize, align=left, inner sep=5pt},
-    arrow/.style={->, >=stealth, thick}
+    classbox/.style={rectangle, draw=black!80, fill=yellow!10, rounded corners=2pt, font=\scriptsize, align=left, inner sep=4pt},
+    arrow/.style={->, >=stealth, thick},
+    rel/.style={dashed, ->, >=stealth, font=\tiny}
 ]
-    % Models
-    \node[classbox, text width=4.5cm] (person) {
+    % Row 1 (Top): Person (left), Librarian (middle), Book (right)
+    \node[classbox, text width=4.1cm] (person) at (0, 0) {
         \textbf{\centerline{<<abstract>> Person}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         \# id : String\\
@@ -74,7 +75,33 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getName() : String
     };
     
-    \node[classbox, text width=4.5cm, below left=1.0cm and -0.8cm of person] (student) {
+    \node[classbox, text width=4.1cm] (librarian) at (5.0, 0) {
+        \textbf{\centerline{Librarian}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - id : int\\
+        - username : String\\
+        - passwordHash : String\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getUsername() : String\\
+        + setUsername(String)
+    };
+    
+    \node[classbox, text width=4.1cm] (book) at (10.0, 0) {
+        \textbf{\centerline{Book}}\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        - accessionId : String\\
+        - isbn : String\\
+        - title : String\\
+        - author : String\\
+        - categoryId : int\\
+        - status : BookStatus\\[2pt]
+        \rule{\linewidth}{0.4pt}\\[2pt]
+        + getAccessionId() : String\\
+        + getStatus() : BookStatus
+    };
+    
+    % Row 2 (Bottom): Student (under Person), BorrowTransaction (between Librarian & Book)
+    \node[classbox, text width=4.1cm] (student) at (0, -4.1) {
         \textbf{\centerline{Student}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         - ktuId : String\\
@@ -89,37 +116,7 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getBranch() : String
     };
     
-    \node[classbox, text width=4.2cm, below right=1.0cm and -0.8cm of person] (librarian) {
-        \textbf{\centerline{Librarian}}\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        - id : int\\
-        - username : String\\
-        - passwordHash : String\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        + getUsername() : String\\
-        + setUsername(String)
-    };
-    
-    \draw[arrow] (student.north) -- ++(0, 0.4) -| (person.south);
-    \draw[arrow] (librarian.north) -- ++(0, 0.4) -| (person.south);
-    
-    % Book Entity
-    \node[classbox, text width=4.5cm, right=1.5cm of person] (book) {
-        \textbf{\centerline{Book}}\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        - accessionId : String\\
-        - isbn : String\\
-        - title : String\\
-        - author : String\\
-        - categoryId : int\\
-        - status : BookStatus\\[2pt]
-        \rule{\linewidth}{0.4pt}\\[2pt]
-        + getAccessionId() : String\\
-        + getStatus() : BookStatus
-    };
-    
-    % Transaction Entity
-    \node[classbox, text width=4.5cm, below=1.0cm of book] (tx) {
+    \node[classbox, text width=4.4cm] (tx) at (7.5, -4.1) {
         \textbf{\centerline{BorrowTransaction}}\\[2pt]
         \rule{\linewidth}{0.4pt}\\[2pt]
         - id : int\\
@@ -136,8 +133,14 @@ The static structure of SmartLib is centered around domain models, generic data 
         + getFine() : BigDecimal
     };
     
-    \draw[dashed, ->] (tx.north) -- (book.south) node[midway, right] {references};
-    \draw[dashed, ->] (tx.west) -- (student.east) node[midway, above] {borrowed by};
+    % Inheritance
+    \draw[arrow] (student.north) -- (person.south);
+    \draw[arrow] (librarian.west) -- (person.east);
+    
+    % Relationships
+    \draw[rel] (tx.west) -- (student.east) node[midway, above] {borrowed by};
+    \draw[rel] (tx.north -| librarian.south) -- (librarian.south) node[midway, left] {processed by};
+    \draw[rel] (tx.north -| book.south) -- (book.south) node[midway, right] {references};
 \end{tikzpicture}
 \caption{UML Class Diagram of Core Domain Entities}
 \label{fig:class_diagram}

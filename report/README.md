@@ -3,11 +3,11 @@
 **Course:** PBCST304 – Object Oriented Programming  
 **Institution:** College of Engineering Trivandrum (CET), APJ Abdul Kalam Technological University (KTU)  
 **Authors:**
-- Adhithyan K S
-- Abhinand V P
-- Prathyush
-- Jenil Prince
-- Derin Jose Sanjith
+- Derin Jose Sanjith (`TVE25CS048`)
+- Jenil Prince (`TVE25CS064`)
+- Prathyush (`TVE25CS105`)
+- Abhinand V P (`LTVE25CS142`)
+- Adhithyan K S (`LTVE25CS143`)
 
 ---
 
