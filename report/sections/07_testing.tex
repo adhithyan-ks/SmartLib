@@ -26,7 +26,9 @@ All manual test cases were executed in the following local environment:
 The test cases below document the functional scenarios tested through the application interface. For complete transparency, features fully verified through the UI are marked as \textbf{PASS}, while features not implemented as dedicated UI controls are explicitly marked as \textbf{NOT TESTED}.
 
 \subsection{User Authentication and Login Portal (\texttt{LoginPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Authentication and Login Test Cases} \label{tab:test_ui_auth} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -51,9 +53,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-06} & Blank Inputs & Leave username or password blank and click Sign In & Error alert ``Please enter both username and password.'' & Alert displayed; form submission halted & PASS \\
 \end{longtable}
+}
 
 \subsection{Student Registration and Input Validation (\texttt{LoginPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Student Registration Test Cases} \label{tab:test_ui_reg} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -74,9 +79,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-10} & Auto-Field Derivation & Type \texttt{TVE23CS005} in KTU ID field in registration form & Batch auto-sets to \texttt{2023-2027}; Branch auto-sets to \texttt{CSE} & Fields auto-selected accurately from KTU ID & PASS \\
 \end{longtable}
+}
 
 \subsection{Book Inventory Management (\texttt{BookPanel} and \texttt{StudentDashboardPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Book Inventory Test Cases} \label{tab:test_ui_books} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -103,9 +111,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-17} & In-Place Book Edit & Edit existing book details in-place via UI modal & (Not implemented in UI; updates require catalog re-entry) & Dedicated UI edit button not present & NOT TESTED \\
 \end{longtable}
+}
 
 \subsection{Circulation Desk: Book Issue and Return (\texttt{BorrowPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Book Issue and Return Test Cases} \label{tab:test_ui_circ} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -128,9 +139,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-22} & Return from Table & Select active loan row in table, click ``Return Selected Book'' & Auto-populates ID; return processed; row removed & Return processed cleanly; table refreshed & PASS \\
 \end{longtable}
+}
 
 \subsection{Active Borrowings Oversight and Overdue Fine Tracking (\texttt{BorrowPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Active Borrowings Oversight Test Cases} \label{tab:test_ui_active} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -153,9 +167,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-27} & Live Table Search & Type student name or book ID into active search text field & Table dynamically filters rows matching typed text & Real-time filtering functions as expected & PASS \\
 \end{longtable}
+}
 
 \subsection{Student Borrow Requests Management (\texttt{StudentDashboardPanel} and \texttt{BorrowPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Borrow Request Test Cases} \label{tab:test_ui_req} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -176,9 +193,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-31} & Reject Request & In Circulation Desk, select pending request, click ``Reject Request'' & Success alert ``Request rejected.''; removed from pending list & Request rejected successfully & PASS \\
 \end{longtable}
+}
 
 \subsection{Title Reservation Queue and Fulfillment (\texttt{ReservationPanel} and \texttt{BorrowPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Title Reservation Test Cases} \label{tab:test_ui_res} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -197,9 +217,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-34} & Fulfil from Desk & In Reservation Desk, select pending reservation, click ``Fulfil Selected'' & Success alert; book allocated to student; status $\to$ \texttt{FULFILLED} & Reservation fulfilled successfully & PASS \\
 \end{longtable}
+}
 
 \subsection{Student Directory and Account Management (\texttt{StudentPanel})}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Student Directory Test Cases} \label{tab:test_ui_stu} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -220,9 +243,12 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-38} & Delete Safeguard & Select student with active/past loan history, click ``Delete Student'' & Deletion rejected with notice to deactivate rather than delete & Deletion blocked; history preserved & PASS \\
 \end{longtable}
+}
 
 \subsection{Student Personal Dues Transparency and Clearance Review}
-\begin{longtable}{p{1.1cm}p{2.0cm}p{2.8cm}p{3.2cm}p{3.2cm}p{1.0cm}}
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{3.1cm} >{\centering\arraybackslash}p{1.4cm}}
 \caption{Student Dues Transparency Test Cases} \label{tab:test_ui_dues} \\
 \toprule
 \textbf{Test ID} & \textbf{Feature} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Actual Result} & \textbf{Status} \\
@@ -239,6 +265,7 @@ The test cases below document the functional scenarios tested through the applic
 \midrule
 \texttt{TC-UI-40} & One-Click Clearance & Dedicated button to generate formal clearance certificate & (Not implemented as separate UI button; clearance is reviewed manually via active loans table) & Dedicated UI certificate button not present & NOT TESTED \\
 \end{longtable}
+}
 
 \section{Manual Test Execution Summary}
 Table~\ref{tab:manual_summary} summarizes the manual functional test execution across all modules of the SmartLib desktop application.

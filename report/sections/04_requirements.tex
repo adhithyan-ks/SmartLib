@@ -109,8 +109,9 @@ The functional requirements specify the actions, operations, and behaviors that 
 \subsection{Software Environment and Dependency Matrix}
 \begin{table}[h!]
     \centering
+    \small
     \caption{Software Environment and Technical Stack}
-    \begin{tabular}{llp{7cm}}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}p{4.2cm} >{\raggedright\arraybackslash}X}
         \toprule
         \textbf{Layer / Component} & \textbf{Technology} & \textbf{Version / Description} \\
         \midrule
@@ -119,10 +120,10 @@ The functional requirements specify the actions, operations, and behaviors that 
         Database Engine & MySQL Community Server & Version 8.0 or higher \\
         Build \& Dependency Tool & Apache Maven & Version 3.8+ (Maven Wrapper \texttt{mvnw} bundled) \\
         Testing Approach & Manual Functional UI Testing & Black-box scenario testing via Java Swing interface \\
-        JDBC Driver & MySQL Connector/J & \texttt{com.mysql:mysql-connector-j:9.4.0} \\
-        Security Library & jBCrypt & \texttt{org.mindrot:jbcrypt:0.4} \\
+        JDBC Driver & MySQL Connector/J & \texttt{com.mysql:}\allowbreak\texttt{mysql-connector-j:}\allowbreak\texttt{9.4.0} \\
+        Security Library & jBCrypt & \texttt{org.mindrot:}\allowbreak\texttt{jbcrypt:0.4} \\
         Operating System & Cross-Platform & Linux (Ubuntu 22.04/24.04), Windows 10/11 \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
     \label{tab:software_specs}
 \end{table}

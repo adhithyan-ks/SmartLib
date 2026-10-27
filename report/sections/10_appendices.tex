@@ -57,11 +57,13 @@ Open a terminal in the root repository folder:
     \end{lstlisting}
 \end{enumerate}
 
+\clearpage
 \section{Default User Credentials}
 \begin{table}[h!]
     \centering
+    \small
     \caption{Default Seed Credentials for Verification}
-    \begin{tabular}{llll}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}X}
         \toprule
         \textbf{Portal / Role} & \textbf{Identifier / Username} & \textbf{Default Password} & \textbf{Access Level} \\
         \midrule
@@ -69,27 +71,28 @@ Open a terminal in the root repository folder:
         Student Portal & \texttt{TVE23CS001} & \texttt{password123} & Student Self-Service \\
         Student Portal & \texttt{TVE23CS002} & \texttt{password123} & Student Self-Service \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
     \label{tab:seed_creds}
 \end{table}
 
 \section{Troubleshooting Matrix}
 \begin{table}[h!]
     \centering
+    \small
     \caption{Common Setup Errors and Solutions}
-    \begin{tabular}{p{4.5cm}p{4cm}p{5.5cm}}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.2cm} >{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}X}
         \toprule
         \textbf{Error Message} & \textbf{Root Cause} & \textbf{Corrective Action} \\
         \midrule
         \texttt{Communications link failure} & MySQL service is stopped or port is not 3306 & Verify that MySQL service is running (\texttt{systemctl status mysql} or \texttt{services.msc}). \\
         \midrule
-        \texttt{Access denied for user 'root'} & Incorrect password in configuration & Verify and update root password in \texttt{src/main/resources/database.properties}. \\
+        \texttt{Access denied for user 'root'} & Incorrect password in configuration & Verify and update root password in \texttt{src/main/}\allowbreak\texttt{resources/}\allowbreak\texttt{database.properties}. \\
         \midrule
         \texttt{Unknown database 'smartlib'} & Database not initialized & Run \texttt{CREATE DATABASE smartlib;} in MySQL Workbench. \\
         \midrule
-        \texttt{Table 'smartlib.books' doesn't exist} & Schema script not executed & Import and execute \texttt{src/main/resources/sql/schema.sql}. \\
+        \texttt{Table 'smartlib.books' doesn't exist} & Schema script not executed & Import and execute \texttt{src/main/}\allowbreak\texttt{resources/sql/}\allowbreak\texttt{schema.sql}. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
     \label{tab:troubleshooting}
 \end{table}
 

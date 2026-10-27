@@ -151,7 +151,9 @@ The static structure of SmartLib is centered around domain models, generic data 
 \section{Class Descriptions, Attributes, and Methods}
 
 \subsection{Domain Models (\texttt{com.college.library.model} and \texttt{dto})}
-\begin{longtable}{p{3.0cm}p{4.0cm}p{6.5cm}}
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}p{4.4cm} >{\raggedright\arraybackslash}p{6.4cm}}
 \caption{Domain Model Class Specifications} \label{tab:models_spec} \\
 \toprule
 \textbf{Class Name} & \textbf{Attributes} & \textbf{Methods and Responsibilities} \\
@@ -183,9 +185,12 @@ The static structure of SmartLib is centered around domain models, generic data 
 \midrule
 \texttt{ActiveBorrowingDTO} & 10 fields: \texttt{txId}, \texttt{bookId}, \texttt{title}, \texttt{author}, \texttt{studentId}, \texttt{studentName}, \texttt{issueDate}, \texttt{dueDate}, \texttt{daysOverdue}, \texttt{currentFine} & Immutable Data Transfer Object designed to carry aggregated active loan details directly to the circulation table. \\
 \end{longtable}
+}
 
 \subsection{Business Services (\texttt{com.college.library.service})}
-\begin{longtable}{p{3.2cm}p{3.8cm}p{6.5cm}}
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}p{4.4cm} >{\raggedright\arraybackslash}p{6.2cm}}
 \caption{Business Service Layer Class Specifications} \label{tab:services_spec} \\
 \toprule
 \textbf{Service Name} & \textbf{DAO Dependencies} & \textbf{Core Methods and Responsibilities} \\
@@ -211,9 +216,12 @@ The static structure of SmartLib is centered around domain models, generic data 
 \midrule
 \texttt{AnalyticsService} & \texttt{BookDAO}, \texttt{StudentDAO}, \texttt{BorrowTransactionDAO} & \texttt{getTotalBooks()}, \texttt{getActiveLoansCount()}, \texttt{getOverdueCount()}, \texttt{getPopularBooks()}. Aggregates executive dashboard metrics. \\
 \end{longtable}
+}
 
 \subsection{Data Access Layer (\texttt{com.college.library.dao} and \texttt{dao.impl})}
-\begin{longtable}{p{3.0cm}p{3.6cm}p{6.9cm}}
+{\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}p{4.2cm} >{\raggedright\arraybackslash}p{6.4cm}}
 \caption{Data Access Layer Specifications} \label{tab:dao_spec} \\
 \toprule
 \textbf{Interface / Impl} & \textbf{Generic Base} & \textbf{Key Query Methods} \\
@@ -229,16 +237,17 @@ The static structure of SmartLib is centered around domain models, generic data 
 \endfoot
 \texttt{CrudDAO<T, ID>} & N/A & \texttt{save(T)}, \texttt{findById(ID)}, \texttt{findAll()}, \texttt{update(T)}, \texttt{delete(ID)}. Generic CRUD contract. \\
 \midrule
-\texttt{BookDAO} / \texttt{Impl} & \texttt{CrudDAO<Book, String>} & \texttt{findByIsbn()}, \texttt{search()}, \texttt{updateStatus()}, \texttt{getPopularBooks()}. Manages accession inventory. \\
+\texttt{BookDAO / Impl} & \texttt{CrudDAO<Book, String>} & \texttt{findByIsbn()}, \texttt{search()}, \texttt{updateStatus()}, \texttt{getPopularBooks()}. Manages accession inventory. \\
 \midrule
-\texttt{StudentDAO} / \texttt{Impl} & \texttt{CrudDAO<Student, String>} & \texttt{findByKtuId()}, \texttt{updatePassword()}, \texttt{countActiveStudents()}. \\
+\texttt{StudentDAO / Impl} & \texttt{CrudDAO<Student, String>} & \texttt{findByKtuId()}, \texttt{updatePassword()}, \texttt{countActiveStudents()}. \\
 \midrule
-\texttt{BorrowTransactionDAO} / \texttt{Impl} & \texttt{CrudDAO<BorrowTransaction, Integer>} & \texttt{findActiveByStudentId()}, \texttt{findActiveByBookId()}, \texttt{findAllActiveTransactionsWithDetails()}, \texttt{closeTransaction()}. \\
+\texttt{BorrowTransactionDAO}\newline\texttt{/ Impl} & \texttt{CrudDAO<Borrow-}\newline\texttt{Transaction, Integer>} & \texttt{findActiveByStudentId()}, \texttt{findActiveByBookId()}, \texttt{findAllActive-}\newline\texttt{TransactionsWithDetails()}, \texttt{closeTransaction()}. \\
 \midrule
-\texttt{ReservationDAO} / \texttt{Impl} & \texttt{CrudDAO<Reservation, Integer>} & \texttt{findEarliestPendingByIsbn()}, \texttt{findByStudentId()}, \texttt{updateStatus()}. \\
+\texttt{ReservationDAO}\newline\texttt{/ Impl} & \texttt{CrudDAO<Reservation,}\newline\texttt{Integer>} & \texttt{findEarliestPendingByIsbn()}, \texttt{findByStudentId()}, \texttt{updateStatus()}. \\
 \midrule
-\texttt{BorrowRequestDAO} / \texttt{Impl} & \texttt{CrudDAO<BorrowRequest, Integer>} & \texttt{findPendingByStudentId()}, \texttt{updateStatus()}. \\
+\texttt{BorrowRequestDAO}\newline\texttt{/ Impl} & \texttt{CrudDAO<Borrow-}\newline\texttt{Request, Integer>} & \texttt{findPendingByStudentId()}, \texttt{updateStatus()}. \\
 \end{longtable}
+}
 
 \section{Relationships Between Classes}
 SmartLib demonstrates the primary object-oriented relationships:
