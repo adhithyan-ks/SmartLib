@@ -139,3 +139,13 @@ If you imported the `sample_data.sql` correctly, you can log in using these defa
 
 **Error: `Table 'smartlib.librarians' doesn't exist`**
 - **Fix:** You created the database but forgot to run `schema.sql`. Import and execute the schema file.
+
+---
+
+## 📄 Course Project Report & AI Agent Guidelines
+
+- **Final Compiled Report:** [`SmartLib_Course_Project_Report.pdf`](SmartLib_Course_Project_Report.pdf)
+- **Report LaTeX Source:** [`report/`](report/)
+- **AI Agent Guidelines for Report Editing:** [`report/AI_AGENT_GUIDELINES.md`](report/AI_AGENT_GUIDELINES.md)
+- **General AI Agent Instructions:** [`AGENTS.md`](AGENTS.md)
+

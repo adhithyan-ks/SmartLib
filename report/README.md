@@ -5,7 +5,7 @@
 **Authors:**
 - Derin Jose Sanjith (`TVE25CS048`)
 - Jenil Prince (`TVE25CS064`)
-- Prathyush (`TVE25CS105`)
+- Prathyush Roy P (`TVE25CS105`)
 - Abhinand V P (`LTVE25CS142`)
 - Adhithyan K S (`LTVE25CS143`)
 
@@ -23,7 +23,8 @@ This directory contains the complete LaTeX source code, figures, database diagra
 report/
 ├── main.tex                       # Master LaTeX document tying all sections together
 ├── references.bib                 # BibTeX references (IEEE citation standard)
-├── SmartLib_Project_Report.pdf    # Compiled high-resolution PDF report
+├── SmartLib_Course_Project_Report.pdf # Compiled high-resolution PDF report
+├── AI_AGENT_GUIDELINES.md         # Strict rules & SOP for AI agents editing the report
 ├── figures/                       # Screenshots and figures embedded in the report
 │   ├── screenshot_login.png       # Login portal (Librarian & Student modes)
 │   ├── screenshot_dashboard.png   # Librarian analytics dashboard
@@ -72,9 +73,37 @@ pdflatex main.tex
 Tectonic is a modern, self-contained TeX engine that automatically downloads packages:
 ```bash
 cd report
-tectonic main.tex
+~/.local/bin/tectonic --keep-intermediates main.tex
 ```
 The output PDF will be generated as `main.pdf`.
+
+> **Important:** Always sync the compiled PDF to deliverables after compiling:
+> ```bash
+> cp report/main.pdf report/SmartLib_Course_Project_Report.pdf && cp report/main.pdf SmartLib_Course_Project_Report.pdf
+> ```
+
+---
+
+## 🤖 AI Agent & Teammate Editing Guidelines
+
+If you or your teammates are using an **AI Coding Agent** (such as Antigravity, Cursor, Claude Code, Copilot, or Windsurf) to modify or extend this report, **you must follow [AI_AGENT_GUIDELINES.md](AI_AGENT_GUIDELINES.md)**.
+
+### Quick Checklist for AI Agents:
+- **Author Sequence Invariant:** Authors must always remain strictly ordered by KTU registration ID:
+  1. `TVE25CS048` - Derin Jose Sanjith
+  2. `TVE25CS064` - Jenil Prince
+  3. `TVE25CS105` - Prathyush Roy P
+  4. `LTVE25CS142` - Abhinand V P
+  5. `LTVE25CS143` - Adhithyan K S
+- **Table Column Overlap Prevention:**
+  - Never use raw narrow fixed `p{width}` with text. Always specify `>{\raggedright\arraybackslash}p{...}` or use `tabularx` with `X` columns.
+  - Multi-column UI test tables in Chapter 6 must use `\footnotesize`, `\tabcolsep=3pt`, and standard column widths defined in the guide.
+  - Add `\allowbreak` in un-hyphenated long strings (paths, Maven artifacts).
+- **Float Control:** Use `\clearpage` before sections if large tables float above section headings.
+- **Verification:** After compiling, inspect modified pages using `pdftoppm -png -r 150 -f <page> -l <page> report/main.pdf /tmp/verify` to confirm zero overlaps or margin spills.
+- **Sync Deliverables:** Copy `report/main.pdf` to both root and `report/SmartLib_Course_Project_Report.pdf`.
+
+Refer to [AI_AGENT_GUIDELINES.md](AI_AGENT_GUIDELINES.md) for full details, column specification standards, and copy-paste prompt templates for teammates.
 
 ---
 
